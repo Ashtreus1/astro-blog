@@ -1,0 +1,221 @@
+---
+import { Astro } from 'astro';
+
+const articles = {
+      "password-reset": {
+        title: "Password Reset: How to Reset Your Password",
+        content: `
+          <p>Forgetting a password happens to everyone, but the good news is that resetting it is quick and easy. A secure password reset process ensures both convenience and protection for your account.</p>
+          <p><strong>Step 1:</strong> Navigate to the login page and click the <em>"Forgot Password"</em> link. You will be prompted to enter the email address associated with your account.</p>
+          <p><strong>Step 2:</strong> Check your inbox for a reset link. This email may take a few minutes to arrive, and sometimes it can be in your spam folder, so make sure to check there as well.</p>
+          <p><strong>Step 3:</strong> Click the reset link provided. You will be redirected to a secure page where you can enter a new password. Choose something strong—combine letters, numbers, and symbols for better security.</p>
+          <p><strong>Step 4:</strong> Confirm your new password and save changes. You can now log in immediately with your updated credentials.</p>
+          <p>If you do not receive a reset email after a few minutes, try requesting it again or contact support for assistance.</p>
+        `
+      },
+      "ticket-history": {
+        title: "Ticket History: Where To View Your Ticket History",
+        content: `
+          <p>Your ticket history provides a full record of past interactions, making it easier to track previous requests and resolutions.</p>
+          <p><strong>Step 1:</strong> Log in to your account and navigate to the <em>"My Tickets"</em> section.</p>
+          <p><strong>Step 2:</strong> A list of all tickets will be displayed, sorted by the most recent updates. Each entry shows the current status—Open, In Progress, or Closed.</p>
+          <p><strong>Step 3:</strong> Click on any ticket to view detailed conversations and responses from the support team. This helps ensure you’re updated on any progress without submitting duplicate requests.</p>
+        `
+      },
+      "ticket-information": {
+        title: "Support Ticket: What Information Should You Include in Your Support Ticket?",
+        content: `
+          <p>A well-written ticket helps our support team respond faster and more effectively. Always try to provide complete and clear information.</p>
+          <p>Here’s what to include:</p>
+          <p>✅ <strong>Account Details:</strong> Include your registered email or username.<br>
+          ✅ <strong>Issue Description:</strong> Be specific about what went wrong. Instead of saying "It doesn’t work," explain what you tried to do and what happened.<br>
+          ✅ <strong>Steps to Reproduce:</strong> List the steps that lead to the issue so we can test it ourselves.<br>
+          ✅ <strong>Screenshots or Files:</strong> Attach images or files if they help illustrate the problem.</p>
+        `
+      },
+      "usability-issues": {
+        title: "Issues That Affect Usability but Don’t Block Core Functions",
+        content: `
+          <p>Some issues can make the system less convenient but don’t stop you from completing important tasks. These are called “usability issues.”</p>
+          <p>Examples include slow page loading, small visual glitches, or misaligned buttons. While they don’t prevent you from using the system, reporting them helps us improve your overall experience.</p>
+        `
+      },
+      "submit-ticket": {
+        title: "How To Submit a Ticket?",
+        content: `
+          <p>Submitting a ticket is the best way to get direct help from our support team.</p>
+          <p><strong>Step 1:</strong> Click <em>"Request a Ticket"</em> in the top navigation bar.<br>
+          <strong>Step 2:</strong> Fill out the form with as many details as possible. Include your issue, account details, and attach screenshots if available.<br>
+          <strong>Step 3:</strong> Submit the form and wait for confirmation. You’ll receive an email with your ticket number.</p>
+        `
+      },
+      "edit-ticket": {
+        title: "Edit Tickets: Are you able to Update or Edit Your Ticket After Submitting It?",
+        content: `
+          <p>Yes, you can add more details to your ticket anytime as long as it’s not closed. Simply open the ticket in your dashboard and select <em>"Add Comment"</em> or <em>"Update Ticket."</em> This ensures the support team has the most updated information.</p>
+        `
+      },
+      "track-ticket": {
+        title: "Ticket Status: How to Track the Status of Your Ticket.",
+        content: `
+          <p>You can track ticket progress in your <em>"My Tickets"</em> dashboard. Each ticket will show its current status (Open, In Progress, or Resolved) and the latest response time. For urgent issues, you can reply in the same ticket to request updates.</p>
+        `
+      },
+      "response-time": {
+        title: "Response Receiving: How Long Does It Take to Receive a Response",
+        content: `
+          <p>Response times depend on issue complexity and current ticket volume. Standard tickets are usually answered within 24 to 48 hours, while urgent ones are prioritized and responded to within 12 hours.</p>
+        `
+      },
+      "view-invoices": {
+        title: "Invoice Viewing: Where To View Your Invoices",
+        content: `
+          <p>Invoices can be viewed under your <em>"Billing"</em> section. Go to <em>"Billing > Invoices"</em> to view and download your invoices in PDF format. Keeping these records is important for your financial tracking.</p>
+        `
+      },
+      "update-payment": {
+        title: "How To Update Your Payment Method",
+        content: `
+          <p>Keeping your payment information updated ensures uninterrupted services. Go to <em>"Billing Settings"</em> in your dashboard, click <em>"Update Payment Method"</em>, and save the new details. A confirmation email will be sent to you after updating.</p>
+        `
+      }
+    };
+
+
+const params = Astro.url.searchParams;
+const slug = params.get("article") ?? "password-reset";
+const article = articles[slug] ?? {
+  title: "Article Not Found",
+  content: "<p>Sorry, the requested article could not be found.</p>"
+};
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChatDesk - Article</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <style>
+      body {
+      background-color: #f0f8ff;
+      font-family: "Poppins", sans-serif;
+      line-height: 1.8;
+      color: #333;
+      scroll-behavior: smooth;
+    }
+    .navbar {
+      background-color: #CAF0F8 !important;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      padding-top: 0.9rem;
+      padding-bottom: 0.9rem;
+    }
+    .navbar-brand {
+      color: #1B4965 !important;
+      font-size: 1.5rem;
+    }
+    .navbar .nav-link {
+      color: #1B4965 !important;
+      font-weight: 500;
+      font-size: 1.05rem;
+    }
+    .btn-primary {
+      background-color: #014F86 !important;
+      border-color: #014F86 !important;
+    }
+
+    /* ✅ Blog Article Styling */
+    .article-wrapper {
+      max-width: 750px;
+      margin: 60px auto;
+      padding: 0 20px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .article-wrapper.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .article-title {
+      color: #1B4965;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 25px;
+      text-align: left;
+    }
+    .article-meta {
+      color: #6c757d;
+      font-size: 0.95rem;
+      margin-bottom: 30px;
+    }
+    .article-content p {
+      font-size: 1.08rem;
+      text-align: justify;
+      margin-bottom: 20px;
+    }
+
+    /* ✅ Feedback Section */
+    .feedback-section {
+      background-color: #CAF0F8;
+      max-width: 500px;
+      margin: 60px auto;
+      padding: 25px 20px;
+      border-radius: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .feedback-section h5 {
+      color: #1B4965;
+      font-weight: 600;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+    }
+    .feedback-section textarea {
+      resize: none;
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+    }
+    .feedback-section button {
+      background-color: #014F86 !important;
+      border: none;
+      padding: 6px 20px;
+      font-size: 0.9rem;
+    }
+    </style>
+  </head>
+  <body>
+
+    <!-- ✅ Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+      <div class="container">
+        <a class="navbar-brand fw-bold" href="/">ChatDesk</a>
+        <div class="d-flex">
+          <a href="#" class="nav-link me-3">Blogs</a>
+          <a href="#" class="btn btn-primary btn-sm">Request a Ticket</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ✅ Main Article -->
+    <div class="article-wrapper show" id="articleWrapper">
+      <h1 class="article-title" id="articleTitle">{article.title}</h1>
+      <p class="article-meta" id="articleMeta">Published on July 23, 2025 • 5 min read</p>
+      <div class="article-content" id="articleContent" set:html={article.content} />
+    </div>
+
+    <!-- ✅ Feedback Section -->
+    <div class="feedback-section">
+      <h5>Was this article helpful?</h5>
+      <textarea class="form-control" rows="3" placeholder="Leave your feedback here..."></textarea>
+      <button class="btn btn-primary mt-2" onclick="submitFeedback()">Submit</button>
+    </div>
+
+    <script>
+      function submitFeedback() {
+        alert("✅ Thank you for your feedback!");
+      }
+    </script>
+  </body>
+</html>
