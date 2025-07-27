@@ -1,20 +1,29 @@
 ---
+	import BaseLayout from '@/layouts/BaseLayout.astro';
 
+	import { Button } from '@/components/ui/button';
+
+	const pageTitle = "Home"; 
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<a href="/">Home</a>
-		<a href="/about/">About</a>
-		<a href="/blog/">Blog</a>
-		
-		<h1>My Astro Site</h1>
-	</body>
-</html>
+<BaseLayout title={pageTitle}>
+  <div class="flex flex-col md:flex-row items-center justify-between min-h-screen px-8 py-16 bg-white">
+    <!-- Left Column -->
+    <div class="md:w-1/2 text-center md:text-left space-y-3">
+      <h1 class="text-4xl md:text-4xl font-bold text-gray-900">
+        Need Help? We’re Here for You     
+      </h1>
+      <p class="text-md text-gray-600 w-3/4">
+        Our dedicated support team is available 24/7 to assist you with any questions or concerns.      
+      </p>
+      <Button className="bg-blue-600 hover:bg-blue-700 cursor-pointer transition duration-300">
+        Request a Ticket
+      </Button>
+    </div>
+
+    <!-- Right Column -->
+    <div class="md:w-1/2 mt-12 md:mt-0 flex justify-center">
+      <img src="/image-hero.png" alt="Event Banner" class="max-w-full h-auto" />
+    </div>
+  </div>
+</BaseLayout>
