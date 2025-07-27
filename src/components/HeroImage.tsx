@@ -5,15 +5,11 @@ export default function HeroImage() {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(min-width: 768px)');
-
     const handleChange = (e: MediaQueryListEvent) => {
       setIsLargeScreen(e.matches);
     };
 
-    // Set initial state
     setIsLargeScreen(mediaQuery.matches);
-
-    // Add event listener for screen resize
     mediaQuery.addEventListener('change', handleChange);
 
     return () => {
