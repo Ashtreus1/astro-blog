@@ -2,12 +2,17 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
+import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
   vite: {
       plugins: [tailwindcss()],
+      define: {
+        'import.meta.env.TOGETHER_API_KEY': JSON.stringify(process.env.TOGETHER_API_KEY),
+      },
 	},
-
-  integrations: [react()]
+  integrations: [react()],
+  output: 'server',
+  adapter: node({ mode: 'standalone' }),
 });

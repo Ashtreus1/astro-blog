@@ -1,12 +1,10 @@
 ---
-	import { Button } from '@/components/ui/button';
+import RequestTicketModal from '@/react-components/RequestTicketModal';
 ---
 <nav class="flex justify-between items-center w-full p-5">
-	<a href="/" class="text-3xl font-semibold text-gray-800">ChatDesk</a>
+	<a href="/" class="ml-10 text-3xl font-semibold text-gray-800">ChatDesk</a>
 	<div class="flex justify-between items-center gap-5 mr-10">
 		<a href="/blogs/" class="hover:underline transition duration-300">Blog</a>
-	    <Button className="bg-blue-600 hover:bg-blue-700 cursor-pointer transition duration-300">
-	        Request a Ticket
-	    </Button>
+		<RequestTicketModal client:load/>
 	</div>
 </nav>
