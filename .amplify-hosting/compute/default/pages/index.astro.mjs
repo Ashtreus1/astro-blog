@@ -1,6 +1,6 @@
 import { c as createComponent, e as renderComponent, r as renderTemplate, m as maybeRenderHead } from '../chunks/astro/server_DUQ9axT8.mjs';
 import 'kleur/colors';
-import { $ as $$BaseLayout, R as RequestTicketModal } from '../chunks/BaseLayout_owAVvC2U.mjs';
+import { $ as $$BaseLayout, R as RequestTicketModal } from '../chunks/BaseLayout_By4gooxz.mjs';
 import { jsx } from 'react/jsx-runtime';
 import { useState, useEffect } from 'react';
 export { renderers } from '../renderers.mjs';

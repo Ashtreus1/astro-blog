@@ -1,6 +1,6 @@
 import { A as AstroError, U as UnknownContentCollectionError, c as createComponent, R as RenderUndefinedEntryError, u as unescapeHTML, r as renderTemplate, a as renderUniqueStylesheet, b as renderScriptElement, d as createHeadAndContent, e as renderComponent, f as createAstro, m as maybeRenderHead } from '../../chunks/astro/server_DUQ9axT8.mjs';
 import 'kleur/colors';
-import { $ as $$BaseLayout } from '../../chunks/BaseLayout_owAVvC2U.mjs';
+import { $ as $$BaseLayout } from '../../chunks/BaseLayout_By4gooxz.mjs';
 import { escape } from 'html-escaper';
 import { Traverse } from 'neotraverse/modern';
 import pLimit from 'p-limit';

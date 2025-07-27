@@ -2,7 +2,7 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
-import awsAmplify from 'astro-aws-amplify'
+import amplify from 'astro-aws-amplify'
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,5 +14,5 @@ export default defineConfig({
 	},
   integrations: [react()],
   output: 'server',
-  adapter: awsAmplify(),
+  adapter: amplify(),
 });
