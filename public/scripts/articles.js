@@ -1,24 +1,18 @@
 let currentSlug = "password-reset";
 
-window.selectArticle = function (element, title, desc, imgSrc, slug) {
-  document.querySelectorAll("#articleList .list-group-item").forEach(item => {
-    item.classList.remove("active");
-  });
-  element.classList.add("active");
+function selectArticle(el, title, desc, img, slug) {
+  const items = document.querySelectorAll('.list-item');
+  items.forEach(item => item.classList.remove('active'));
+  el.classList.add('active');
 
-  const card = document.getElementById("articleCard");
-  card.classList.add("fade-out");
+  document.getElementById('articleTitle').textContent = title;
+  document.getElementById('articleDesc').textContent = desc;
+  document.getElementById('articleImg').src = img;
 
-  setTimeout(() => {
-    document.getElementById("articleTitle").innerText = title;
-    document.getElementById("articleDesc").innerText = desc;
-    document.getElementById("articleImg").src = imgSrc;
-    card.classList.remove("fade-out");
-  }, 400);
 
   currentSlug = slug;
-};
+}
 
 window.openFullArticle = function () {
-  window.location.href = `/article?article=${currentSlug}`;
+  window.location.href = `/blogs/${currentSlug}`;
 };
