@@ -2,9 +2,8 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
-import amplify from 'astro-aws-amplify'
+import netlify from '@astrojs/netlify/functions';
 
-// https://astro.build/config
 export default defineConfig({
   vite: {
       plugins: [tailwindcss()],
@@ -14,5 +13,5 @@ export default defineConfig({
 	},
   integrations: [react()],
   output: 'server',
-  adapter: amplify(),
+  adapter: netlify(),
 });
