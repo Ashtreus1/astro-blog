@@ -1,45 +1,39 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { loadMarkdownArticle } from '@/utils/loadMarkdown';
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { getCollection } from 'astro:content';
 
-// Generate all article paths at build time
 export async function getStaticPaths() {
-  const articlesDir = fileURLToPath(new URL('../../content/articles/', import.meta.url));
-  const files = await fs.readdir(articlesDir);
-  const paths = files
-    .filter(file => file.endsWith('.md'))
-    .map(file => ({
-      params: { slug: file.replace('.md', '') },
-    }));
-
-  return paths;
+  const articles = await getCollection('articles');
+  return articles.map(article => ({
+    params: { slug: article.slug },
+  }));
 }
 
-// Fetch article data by slug
-const slug = Astro.params.slug;
-const article = await loadMarkdownArticle(slug);
+const { slug } = Astro.params;
+const articles = await getCollection('articles');
+const article = articles.find(article => article.slug === slug);
 
 if (!article) {
   throw new Error(`Article not found for slug: ${slug}`);
 }
 
-const { html, frontmatter } = article;
+const { Content } = await article.render();
+const { title, pubDate, author } = article.data;
 ---
 
-<BaseLayout title={frontmatter.title}>
+<BaseLayout title={title}>
   <article class="max-w-3xl mx-auto px-4 pt-10 pb-16 poppins-light text-[#1c1c1c] leading-relaxed">
     <h1 class="text-4xl md:text-5xl font-bold mb-6">
-      {frontmatter.title}
+      {title}
     </h1>
 
     <p class="text-sm text-gray-500 mb-10 border-b pb-4">
-      Published on {frontmatter.pubDate} · {frontmatter.author}
+      Published on {pubDate} · {author}
     </p>
 
-    <div class="prose prose-lg max-w-none text-justify" set:html={html} />
+    <div class="prose prose-lg max-w-none text-justify">
+      <Content />
+    </div>
   </article>
 
   <section class="bg-gray-50 max-w-xl mx-auto mt-16 p-6 rounded-xl shadow-sm">
