@@ -1,6 +1,6 @@
 ---
 title: "Password Reset: How to Reset Your Password"
-pubDate: 2025-07-23
+pubDate: "2025-07-23"
 description: "Learn how to reset your password in simple steps."
 author: "Keiru"
 tags: ["support", "account"]
