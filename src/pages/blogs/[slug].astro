@@ -1,0 +1,58 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles');
+  return articles.map(article => ({
+    params: { slug: article.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+const articles = await getCollection('articles');
+const article = articles.find(article => article.slug === slug);
+
+if (!article) {
+  throw new Error(`Article not found for slug: ${slug}`);
+}
+
+const { Content } = await article.render();
+const { title, pubDate, author } = article.data;
+---
+
+<BaseLayout title={title}>
+  <article class="max-w-3xl mx-auto px-4 pt-10 pb-16 poppins-light text-[#1c1c1c] leading-relaxed">
+    <h1 class="text-4xl md:text-5xl font-bold mb-6">
+      {title}
+    </h1>
+
+    <p class="text-sm text-gray-500 mb-10 border-b pb-4">
+      Published on {pubDate} · {author}
+    </p>
+
+    <div class="prose prose-lg max-w-none text-justify">
+      <Content />
+    </div>
+  </article>
+
+  <section class="bg-gray-50 max-w-xl mx-auto mt-16 p-6 rounded-xl shadow-sm">
+    <h5 class="text-lg font-semibold text-gray-800 mb-3 text-center">
+      Was this article helpful?
+    </h5>
+    <textarea 
+      class="w-full resize-none rounded-md border border-gray-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 mb-3" 
+      rows="4" 
+      placeholder="Leave your feedback here...">
+    </textarea>
+    <div class="text-center">
+      <button 
+        onclick="submitFeedback()"
+        class="bg-[#014F86] hover:bg-[#013f6c] text-white text-sm font-medium py-2 px-6 rounded-md transition-colors">
+        Submit
+      </button>
+    </div>
+  </section>
+
+  <script type="module" src="/scripts/feedback.js"></script>
+</BaseLayout>

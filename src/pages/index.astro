@@ -1,0 +1,26 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import HeroImage from '@/react-components/HeroImage';
+import RequestTicketModal from '@/react-components/RequestTicketModal';
+
+const pageTitle = "Home";
+---
+
+<BaseLayout title={pageTitle}>
+  <div class="flex flex-col md:flex-row items-center justify-center md:justify-between min-h-screen px-8">
+    <!-- Content Column -->
+    <div class="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left space-y-4 ml-20">
+      <h1 class="text-4xl font-bold text-gray-900">
+        Need Help? We’re Here for You
+      </h1>
+      <p class="text-md text-gray-600 max-w-md">
+        Our dedicated support team is available 24/7 to assist you with any questions or concerns.
+      </p>
+      <div class="flex justify-center md:justify-start w-full">
+        <RequestTicketModal client:load/>
+      </div>
+    </div>
+
+    <HeroImage client:load/>
+  </div>
+</BaseLayout>
