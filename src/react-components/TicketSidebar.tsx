@@ -22,7 +22,7 @@ export default function TicketSidebar({ selected, onSelect }: Props) {
       const { data, error } = await supabase
         .from('tickets')
         .select('*')
-        .order('created_at', { ascending: false }); // optional ordering
+        .order('created_at', { ascending: false }); 
 
       if (error) {
         console.error('Failed to fetch tickets:', error);
