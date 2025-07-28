@@ -102,7 +102,7 @@ export default function RequestTicketModal() {
                   {issuesList.length > 0 ? (
                     issuesList.map((opt) => (
                       <SelectItem key={opt.issue} value={opt.issue}>
-                        {opt.issue} ({opt.priority})
+                        {opt.issue}
                       </SelectItem>
                     ))
                   ) : (

@@ -12,6 +12,23 @@ interface Ticket {
 
 export default function CustomerChat({ ticket }: { ticket: Ticket }) {
   const [messages, setMessages] = useState<any[]>([]);
+  const [priority, setPriority] = useState<'Low' | 'Medium' | 'High' | ''>('');
+
+  useEffect(() => {
+    const loadTicketData = async () => {
+      const { data, error } = await supabase
+        .from('tickets')
+        .select('priority')
+        .eq('id', ticket.id)
+        .single();
+
+      if(!error && data){
+        setPriority(data.priority);
+      }
+    }
+
+    loadTicketData();
+  }, [ticket.id])
 
   useEffect(() => {
     supabase.from('messages').select('*').eq('ticket_id', ticket.id).order('created_at',{ascending:true})
@@ -33,7 +50,7 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
         <h2 className="text-xl font-bold">{ticket.name}</h2>
         <p className="text-sm">{`${ticket.issue} – ${ticket.status}`}</p>
       </div>
-      <MessageBox ticketId={ticket.id} messages={messages} appendMessage={appendMessage} senderType={'customer'} />
+      <MessageBox ticketId={ticket.id} messages={messages} appendMessage={appendMessage} senderType={'customer'} priority={priority} />
     </div>
   );
 }

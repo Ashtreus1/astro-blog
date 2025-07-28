@@ -8,7 +8,7 @@ const together = new Together({
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const { ticketId, userMessage } = await request.json();
+    const { ticketId, userMessage, priority } = await request.json();
 
     if (!ticketId || !userMessage || typeof userMessage !== 'string') {
       return new Response(JSON.stringify({ error: 'Invalid input' }), { status: 400 });

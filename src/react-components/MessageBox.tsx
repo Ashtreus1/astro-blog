@@ -9,9 +9,10 @@ interface Props {
   senderType: 'support' | 'customer';
   messages: any[];
   appendMessage: (message: any) => void;
+  priority: 'Low' | 'Medium' | 'High';
 }
 
-export default function MessageBox({ ticketId, senderType, messages, appendMessage }: Props) {
+export default function MessageBox({ ticketId, senderType, messages, appendMessage, priority }: Props) {
   const [msg, setMsg] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -29,11 +30,12 @@ export default function MessageBox({ ticketId, senderType, messages, appendMessa
     return () => supabase.removeChannel(chan);
   }, [ticketId, appendMessage]);
 
+
   useEffect(() => {
     containerRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {2
     e.preventDefault();
     if (!msg.trim()) return;
 
@@ -45,8 +47,7 @@ export default function MessageBox({ ticketId, senderType, messages, appendMessa
       }
     ]);
 
-    if (senderType === 'customer') {
-      // Trigger the bot follow-up
+    if (senderType === 'customer' && priority === 'Low') {
       await fetch('/api/bot-reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
