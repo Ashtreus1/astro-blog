@@ -18,25 +18,55 @@ export default function TicketSidebar({ selected, onSelect }: Props) {
   const [tickets, setTickets] = useState<Ticket[]>([]);
 
   useEffect(() => {
-    supabase.from<Ticket>('tickets').select('*').then(r => {
-      if (!r.error && r.data) setTickets(r.data);
-    });
+    const fetchTickets = async () => {
+      const { data, error } = await supabase
+        .from('tickets')
+        .select('*')
+        .order('created_at', { ascending: false }); // optional ordering
 
-    const sub = supabase
-      .channel('tickets')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, payload => {
-        setTickets(prev => {
-          switch (payload.eventType) {
-            case 'INSERT': return [...prev, payload.new];
-            case 'UPDATE': return prev.map(t => t.id === payload.new.id ? payload.new : t);
-            case 'DELETE': return prev.filter(t => t.id !== payload.old.id);
-            default: return prev;
-          }
-        });
-      })
+      if (error) {
+        console.error('Failed to fetch tickets:', error);
+      } else if (data) {
+        setTickets(data);
+      }
+    };
+
+    fetchTickets();
+
+    const channel = supabase
+      .channel('realtime:tickets')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tickets' },
+        payload => {
+          setTickets(prev => {
+            const { eventType, new: newTicket, old: oldTicket } = payload;
+
+            switch (eventType) {
+              case 'INSERT':
+                // Prevent duplicate insertions
+                if (!prev.some(t => t.id === newTicket.id)) {
+                  return [newTicket, ...prev];
+                }
+                return prev;
+
+              case 'UPDATE':
+                return prev.map(t => t.id === newTicket.id ? newTicket : t);
+
+              case 'DELETE':
+                return prev.filter(t => t.id !== oldTicket.id);
+
+              default:
+                return prev;
+            }
+          });
+        }
+      )
       .subscribe();
 
-    return () => void supabase.removeChannel(sub);
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return (
