@@ -22,7 +22,8 @@ const { title, pubDate, author } = article.data;
 ---
 
 <BaseLayout title={title}>
-  <article class="max-w-3xl mx-auto px-4 pt-10 pb-16 poppins-light text-[#1c1c1c] leading-relaxed">
+  <article class="max-w-3xl mx-auto px-4 pt-[96px] pb-16 poppins-light text-[#1c1c1c] leading-relaxed">
+
     <h1 class="text-4xl md:text-5xl font-bold mb-6">
       {title}
     </h1>
@@ -31,7 +32,7 @@ const { title, pubDate, author } = article.data;
       Published on {pubDate} · {author}
     </p>
 
-    <div class="prose prose-lg max-w-none text-justify">
+    <div class="custom-markdown">
       <Content />
     </div>
   </article>
