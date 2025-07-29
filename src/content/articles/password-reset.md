@@ -6,7 +6,20 @@ author: "Keiru"
 tags: ["support", "account"]
 ---
 
+
 Forgetting a password happens to everyone, but the good news is that resetting it is quick and easy. A secure password reset process ensures both convenience and protection for your account.
+
+---
+
+## 🔄 Why a Secure Reset Process Matters
+
+Your password is the first line of defense against unauthorized access. When it's lost or forgotten, the reset process becomes the gateway back into your account. If not done securely, it can also become an entry point for attackers.
+
+This is why platforms implement **email verification**, **one-time tokens**, and **expiry limits** during the reset process.
+
+---
+
+## 🧭 Step-by-Step Password Reset Guide
 
 **Step 1:** Navigate to the login page and click the *"Forgot Password"* link. You will be prompted to enter the email address associated with your account.
 
@@ -16,4 +29,30 @@ Forgetting a password happens to everyone, but the good news is that resetting i
 
 **Step 4:** Confirm your new password and save changes. You can now log in immediately with your updated credentials.
 
-If you do not receive a reset email after a few minutes, try requesting it again or contact support for assistance.
+---
+
+## ⚠️ What If You Didn’t Request a Reset?
+
+If you receive a password reset email but didn’t request one, do **not** click the link.
+
+Instead, take the following precautions:
+
+- Change your password immediately if you suspect any unauthorized activity.
+- Enable **2-factor authentication** (2FA) for extra protection.
+- Report the suspicious activity to your support team.
+
+> _Your online safety is just as important as your physical security._
+
+---
+
+## 🔐 Tips for Creating a Strong Password
+
+Creating a secure password is essential. Here are some tips:
+
+- ✅ Use at least **12 characters**.
+- ✅ Include **uppercase and lowercase letters**.
+- ✅ Add **numbers** and **special characters**.
+- 🚫 Avoid common words or personal info like birthdays or pet names.
+- 🚫 Don’t reuse old passwords.
+
+
