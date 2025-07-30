@@ -1,4 +1,33 @@
 ---
+/*
+  "Blogs" page ng application.
+
+  ➤ Ginagamitan natin ng `BaseLayout` component para magkaroon ng consistent layout 
+     (shared navigation, global styles, etc.) across all pages.
+
+  ➤ Nagde-define tayo ng dynamic page title gamit ang `pageTitle` constant 
+     na pinapasa natin bilang prop sa `BaseLayout`.
+
+  ➤ Sa page na ito, meron tayong Articles Section na nahahati sa dalawang bahagi:
+
+     1. **Article Card (Left Section)**  
+        ➤ Isang malaking card na nagpapakita ng selected article content  
+        ➤ May title, description, at image na dynamic ang laman  
+        ➤ On click, mag-oopen ito ng full article (`openFullArticle()` function)
+
+     2. **Scrollable Article List (Right Section)**  
+        ➤ Listahan ng iba't-ibang articles na pwedeng i-click  
+        ➤ Kada item ay may `onclick="selectArticle(...)"` event  
+        ➤ Kapag kinlick ang item, napapalitan ang content sa left card
+
+  ➤ Gumagamit tayo ng external JS file na `articles.js` (naka `defer`) 
+     para i-handle ang interactivity tulad ng article switching.
+
+  ➤ Ang layout ng articles ay responsive gamit ang Tailwind CSS utility classes:
+     - `grid-cols-1` sa mobile
+     - `grid-cols-2` sa medium screens pataas
+*/
+
 import BaseLayout from '@/layouts/BaseLayout.astro';
 
 const pageTitle = "Blogs";
@@ -10,22 +39,28 @@ const pageTitle = "Blogs";
     <h3 class="text-gray-700 text-center text-4xl font-bold mb-8">Articles</h3>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Left card -->
+
+      <!-- LEFT SECTION: Main Article Card -->
       <div>
         <div
           id="articleCard"
           class="bg-[#CAF0F8] rounded-[14px] px-8 py-10 text-center shadow-sm transition duration-200 ease-in-out transform hover:-translate-y-[3px] hover:shadow-lg h-[400px] flex flex-col justify-center items-center cursor-pointer"
           onclick="openFullArticle()"
         >
+          <!-- Article image -->
           <img
             id="articleImg"
             src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png"
             alt="Password Reset"
             class="max-w-[130px] mb-5"
           />
+
+          <!-- Article title -->
           <h6 id="articleTitle" class="text-[#003366] text-[1.35rem] font-semibold mb-2">
             Password Reset
           </h6>
+
+          <!-- Article description -->
           <p
             id="articleDesc"
             class="text-[#555] text-[1.08rem] leading-[1.5] max-w-[95%] mx-auto min-h-[60px]"
@@ -35,10 +70,12 @@ const pageTitle = "Blogs";
         </div>
       </div>
 
-      <!-- Right scrollable list -->
+      <!-- RIGHT SECTION: Scrollable Article List -->
       <div>
         <div class="max-h-[400px] overflow-y-auto overflow-x-hidden rounded-[10px] border border-gray-200">
           <ul id="articleList" class="space-y-2 p-2">
+            <!-- Each list item represents a clickable article link -->
+            <!-- Kapag kinlick, tatawagin ang selectArticle(...) function -->
             <li class="list-item active" onclick="selectArticle(this, 'Password Reset', 'This teaches you on how to reset your password', 'https://cdn-icons-png.flaticon.com/512/3064/3064197.png', 'password-reset')">
               Password Reset
             </li>
@@ -72,8 +109,10 @@ const pageTitle = "Blogs";
           </ul>
         </div>
       </div>
+
     </div>
   </div>
 
+  <!-- External JavaScript na nagha-handle ng article selection logic -->
   <script src="/scripts/articles.js" defer></script>
 </BaseLayout>

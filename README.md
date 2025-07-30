@@ -40,6 +40,8 @@ To run the project on your local machine, follow these steps:
 3.  **Set up Environment Variables:**
     This project requires an API key for Together AI. Create a `.env` file in the root directory and add your key:
     ```
+    PUBLIC_SUPABASE_URL="your-api-key"
+    PUBLIC_SUPABASE_ANON_KEY="your-api-key"
     TOGETHER_API_KEY="your-api-key"
     ```
 
