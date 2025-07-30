@@ -1,3 +1,4 @@
+import React from "react";
 import TicketStats from "@/react-components/TicketStats";
 import AgentList from "@/react-components/AgentLists";
 import ResponseCharts from "@/react-components/ResponseCharts";
@@ -9,11 +10,19 @@ export default function AdminPanel() {
       <div className="col-span-2 space-y-4">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">ChatDesk</h1>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded">SLA Report</button>
+          
+          {/* Link to SLA Report */}
+          <a href="/report">
+            <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+              SLA Report
+            </button>
+          </a>
         </div>
+
         <TicketStats />
         <ResponseCharts />
       </div>
+
       <AgentList />
       <AssignTicketModal />
     </div>
