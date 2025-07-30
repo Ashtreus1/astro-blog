@@ -1,0 +1,141 @@
+---
+// Astro Page: SLA Report
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const pageTitle = "SLA REPORT";
+const reportPeriod = "July 1 – July 28, 2025";
+---
+<BaseLayout title={pageTitle}>
+  <section class="p-8 max-w-6xl mx-auto text-black">
+    <h1 class="text-4xl font-bold mb-2">SLA REPORT</h1>
+    <p class="text-lg font-medium mb-6">Reporting Period: {reportPeriod}</p>
+
+    <!-- Executive Summary -->
+    <div class="border-2 rounded-xl p-6 bg-white shadow-md mb-8">
+      <h2 class="text-2xl font-bold mb-4">Executive Summary</h2>
+      <ul class="text-lg space-y-1">
+        <li><strong>Total Tickets:</strong> 58,175</li>
+        <li><strong>Resolved within SLA:</strong> 4,761</li>
+        <li><strong>Violated SLA:</strong> 61</li>
+        <li><strong>SLA Compliance Rate:</strong> 90%</li>
+      </ul>
+    </div>
+
+    <!-- SLA Metrics -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-2">SLA Metrics</h3>
+      <table class="w-full table-auto border-collapse text-left bg-white shadow-md">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border px-4 py-2">Metric</th>
+            <th class="border px-4 py-2">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="border px-4 py-2">Average Response Time</td>
+            <td class="border px-4 py-2">38 minutes</td>
+          </tr>
+          <tr>
+            <td class="border px-4 py-2">Average Resolution Time</td>
+            <td class="border px-4 py-2">3 hours 45 minutes</td>
+          </tr>
+          <tr>
+            <td class="border px-4 py-2">Total Tickets Received</td>
+            <td class="border px-4 py-2">340</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Performance by Priority -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-2">Performance by Priority</h3>
+      <table class="w-full table-auto border-collapse text-left bg-white shadow-md">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border px-4 py-2">Priority</th>
+            <th class="border px-4 py-2">SLA Target</th>
+            <th class="border px-4 py-2">% Met</th>
+            <th class="border px-4 py-2">Avg. Response Time</th>
+            <th class="border px-4 py-2">Avg. Resolution Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="border px-4 py-2">High</td>
+            <td class="border px-4 py-2">1 hour</td>
+            <td class="border px-4 py-2">95%</td>
+            <td class="border px-4 py-2">25 minutes</td>
+            <td class="border px-4 py-2">1 hour 30 minutes</td>
+          </tr>
+          <tr>
+            <td class="border px-4 py-2">Medium</td>
+            <td class="border px-4 py-2">4 hours</td>
+            <td class="border px-4 py-2">88%</td>
+            <td class="border px-4 py-2">1 hour 20 minutes</td>
+            <td class="border px-4 py-2">5 hours</td>
+          </tr>
+          <tr>
+            <td class="border px-4 py-2">Low</td>
+            <td class="border px-4 py-2">24 hours</td>
+            <td class="border px-4 py-2">92%</td>
+            <td class="border px-4 py-2">3 hours</td>
+            <td class="border px-4 py-2">20 hours</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Performance by Ticket Type -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-2">Performance by Ticket Type</h3>
+      <table class="w-full table-auto border-collapse text-left bg-white shadow-md">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border px-4 py-2">Ticket Type</th>
+            <th class="border px-4 py-2">SLA Target</th>
+            <th class="border px-4 py-2">Breached</th>
+            <th class="border px-4 py-2">% SLA Met</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="border px-4 py-2">Account Locked</td>
+            <td class="border px-4 py-2">Respond in 30m</td>
+            <td class="border px-4 py-2">2</td>
+            <td class="border px-4 py-2">95%</td>
+          </tr>
+          <tr>
+            <td class="border px-4 py-2">Billing Issue</td>
+            <td class="border px-4 py-2">Resolve in 6h</td>
+            <td class="border px-4 py-2">10</td>
+            <td class="border px-4 py-2">85%</td>
+          </tr>
+          <tr>
+            <td class="border px-4 py-2">Technical Support</td>
+            <td class="border px-4 py-2">Resolve in 24h</td>
+            <td class="border px-4 py-2">20</td>
+            <td class="border px-4 py-2">89%</td>
+          </tr>
+          <tr>
+            <td class="border px-4 py-2">General Inquiry</td>
+            <td class="border px-4 py-2">Respond in 6h</td>
+            <td class="border px-4 py-2">5</td>
+            <td class="border px-4 py-2">95%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="bg-white shadow-md p-6 rounded-xl">
+      <h3 class="text-xl font-bold mb-4">Recommendations:</h3>
+      <ul class="list-disc list-inside text-lg space-y-2">
+        <li><strong>Optimize staffing</strong> during peak hours to prevent response and resolution delays.</li>
+        <li><strong>Improve SLA breach alerts</strong> to notify supervisors in real-time when tickets are nearing SLA limits.</li>
+        <li><strong>Provide targeted training</strong> for agents handling high-priority or complex issues.</li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
