@@ -17,7 +17,7 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
   const [status, setStatus] = useState(ticket.status);
   const [initialLoad, setInitialLoad] = useState(false);
 
-  // Load ticket details: priority + (bot messages if low)
+  // Load ticket info and messages
   useEffect(() => {
     const loadTicketData = async () => {
       const { data, error } = await supabase
@@ -30,26 +30,23 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
         setPriority(data.priority);
         setStatus(data.status);
 
-        // If Low priority, load bot messages right away
-        if (data.priority === 'Low') {
-          const { data: botMessages } = await supabase
-            .from('messages')
-            .select('*')
-            .eq('ticket_id', ticket.id)
-            .order('created_at', { ascending: true });
+        const { data: botMessages } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('ticket_id', ticket.id)
+          .order('created_at', { ascending: true });
 
-          setMessages(botMessages || []);
-          setInitialLoad(true);
-        }
+        setMessages(botMessages || []);
+        setInitialLoad(true);
       }
     };
 
     loadTicketData();
   }, [ticket.id]);
 
-  // Subscribe to ticket status change (only for medium/high)
+  // Subscribe to ticket status (if not Low)
   useEffect(() => {
-    if (priority === 'Low') return; // skip for bot-only tickets
+    if (priority === 'Low') return;
 
     const ticketChannel = supabase
       .channel(`ticket-status-${ticket.id}`)
@@ -75,24 +72,13 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
     };
   }, [ticket.id, status, priority]);
 
-  // Subscribe to chat messages (for Assigned/Ongoing or Low)
+  // Subscribe to messages
   useEffect(() => {
-    if (priority === 'Low' || status === 'Assigned' || status === 'Ongoing') {
-      const loadMessages = async () => {
-        const { data } = await supabase
-          .from('messages')
-          .select('*')
-          .eq('ticket_id', ticket.id)
-          .order('created_at', { ascending: true });
-
-        if (data) {
-          setMessages(data);
-          setInitialLoad(true);
-        }
-      };
-
-      loadMessages();
-
+    if (
+      priority === 'Low' ||
+      status === 'Assigned' ||
+      status === 'Ongoing'
+    ) {
       const messageChannel = supabase
         .channel(`messages-${ticket.id}`)
         .on(
@@ -104,7 +90,10 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
             filter: `ticket_id=eq.${ticket.id}`,
           },
           (payload) => {
-            setMessages((prev) => [...prev, payload.new]);
+            setMessages((prev) => {
+              const exists = prev.some((m) => m.id === payload.new.id);
+              return exists ? prev : [...prev, payload.new];
+            });
           }
         )
         .subscribe();
@@ -115,7 +104,9 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
     }
   }, [status, priority, ticket.id]);
 
-  const appendMessage = (msg: any) => setMessages((prev) => [...prev, msg]);
+  const appendMessage = (msg: any) => {
+    setMessages((prev) => [...prev, msg]);
+  };
 
   return (
     <div className="flex flex-col h-full">

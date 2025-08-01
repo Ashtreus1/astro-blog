@@ -42,7 +42,7 @@ const ChatBox = ({ senderType, priority }: { senderType: string; priority: strin
 
     if (senderType === 'customer' && priority === 'Low') {
       try {
-        const res = await fetch('/api/bot-reply-popup', {
+        const res = await fetch('/api/bot-reply', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userMessage: trimmed, priority }),

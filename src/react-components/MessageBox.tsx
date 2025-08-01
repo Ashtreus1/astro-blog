@@ -36,11 +36,15 @@ export default function MessageBox({
           table: 'messages',
           filter: `ticket_id=eq.${ticketId}`,
         },
-        (payload) => appendMessage(payload.new)
+        (payload) => {
+          appendMessage(payload.new);
+        }
       )
       .subscribe();
 
-    return () => supabase.removeChannel(chan);
+    return () => {
+      supabase.removeChannel(chan);
+    };
   }, [ticketId, appendMessage]);
 
   useEffect(() => {
@@ -51,28 +55,48 @@ export default function MessageBox({
     e.preventDefault();
     if (!msg.trim()) return;
 
-    await supabase.from('messages').insert([
-      {
-        ticket_id: ticketId,
-        content: msg,
-        sender: senderType,
-      },
-    ]);
+    const newMessage = {
+      ticket_id: ticketId,
+      content: msg,
+      sender: senderType,
+      created_at: new Date().toISOString(),
+    };
 
-    if (senderType === 'customer' && priority === 'Low') {
-      await fetch('/api/bot-reply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticketId, userMessage: msg }),
-      });
+    appendMessage(newMessage); // Optimistically show user message
+    setMsg('');
+
+    const { error } = await supabase.from('messages').insert([newMessage]);
+    if (error) {
+      console.error('Failed to insert message:', error);
+      return;
     }
 
-    setMsg('');
+    // Send bot reply if Low priority
+    if (senderType === 'customer' && priority === 'Low') {
+      try {
+        const res = await fetch('/api/bot-reply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ticketId, userMessage: msg, priority }),
+        });
+
+        if (res.ok) {
+          const { reply } = await res.json();
+          appendMessage({
+            ticket_id: ticketId,
+            content: reply,
+            sender: 'support',
+            created_at: new Date().toISOString(),
+          });
+        }
+      } catch (err) {
+        console.error('Bot reply failed:', err);
+      }
+    }
   };
 
   return (
     <div className="flex flex-col h-full p-4">
-
       <div className="flex-1 overflow-y-auto space-y-3 mb-4">
         {messages.length === 0 ? (
           <p className="text-gray-400 italic">No messages yet.</p>

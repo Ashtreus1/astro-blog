@@ -10,12 +10,16 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const { ticketId, userMessage, priority } = await request.json();
 
-    if (!ticketId || !userMessage || typeof userMessage !== 'string') {
+    if (!userMessage || typeof userMessage !== 'string') {
       return new Response(JSON.stringify({ error: 'Invalid input' }), { status: 400 });
     }
 
-    // Sanitize and limit message length to avoid abuse
     const sanitizedMessage = userMessage.trim().slice(0, 1000);
+
+    // Only allow auto-response if priority is "Low"
+    if (priority !== 'Low') {
+      return new Response(JSON.stringify({ error: 'Only low-priority messages are supported' }), { status: 403 });
+    }
 
     const promptMessages = [
       {
@@ -54,27 +58,32 @@ If no technical issue is detected in the message, respond with a polite refusal 
     const reply = chat.choices?.[0]?.message?.content?.trim();
 
     if (!reply) {
-      console.warn('Bot returned empty response');
       return new Response(JSON.stringify({ error: 'No response from assistant' }), { status: 502 });
     }
 
-    const { error } = await supabase.from('messages').insert([
-      {
-        ticket_id: ticketId,
-        content: reply,
-        sender: 'support',
-      }
-    ]);
+    // If there's a ticketId, this came from MessageBox (database-backed)
+    if (ticketId) {
+      const { error } = await supabase.from('messages').insert([
+        {
+          ticket_id: ticketId,
+          content: reply,
+          sender: 'support',
+        }
+      ]);
 
-    if (error) {
-      console.error('Supabase insert error:', error.message);
-      return new Response(JSON.stringify({ error: 'Failed to save reply' }), { status: 500 });
+      if (error) {
+        console.error('Supabase insert error:', error.message);
+        return new Response(JSON.stringify({ error: 'Failed to save reply' }), { status: 500 });
+      }
+
+      return new Response(JSON.stringify({ success: true, reply }), { status: 200 });
     }
 
-    return new Response(JSON.stringify({ success: true, reply }), { status: 200 });
+    // Otherwise, from ChatPopup
+    return new Response(JSON.stringify({ reply }), { status: 200 });
 
   } catch (err) {
-    console.error('Bot follow-up error:', err);
+    console.error('Bot unified error:', err);
     return new Response(JSON.stringify({ error: 'Unexpected server error' }), { status: 500 });
   }
 };
