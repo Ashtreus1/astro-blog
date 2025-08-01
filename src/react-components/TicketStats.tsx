@@ -1,13 +1,9 @@
-// src/react-components/TicketStats.tsx
 import React from "react";
 
 const stats = [
-  { title: "Unresolved", count: 271461 },
-  { title: "Overdue", count: 41414 },
-  { title: "Due Today", count: 65175 },
-  { title: "Open", count: 13141 },
-  { title: "On Hold", count: 64126 },
-  { title: "Unassigned", count: 36151 },
+  { title: "Resolved", count: 0 },
+  { title: "Overdue", count: 0 },
+  { title: "Unassigned", count: 0 },
 ];
 
 export default function TicketStats() {

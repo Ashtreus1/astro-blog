@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import MessageBox from './MessageBox';
 import { supabase } from '@/lib/supabaseClient';
@@ -13,44 +14,149 @@ interface Ticket {
 export default function CustomerChat({ ticket }: { ticket: Ticket }) {
   const [messages, setMessages] = useState<any[]>([]);
   const [priority, setPriority] = useState<'Low' | 'Medium' | 'High' | ''>('');
+  const [status, setStatus] = useState(ticket.status);
+  const [initialLoad, setInitialLoad] = useState(false);
 
+  // Load ticket details: priority + (bot messages if low)
   useEffect(() => {
     const loadTicketData = async () => {
       const { data, error } = await supabase
         .from('tickets')
-        .select('priority')
+        .select('priority, status')
         .eq('id', ticket.id)
         .single();
 
-      if(!error && data){
+      if (!error && data) {
         setPriority(data.priority);
+        setStatus(data.status);
+
+        // If Low priority, load bot messages right away
+        if (data.priority === 'Low') {
+          const { data: botMessages } = await supabase
+            .from('messages')
+            .select('*')
+            .eq('ticket_id', ticket.id)
+            .order('created_at', { ascending: true });
+
+          setMessages(botMessages || []);
+          setInitialLoad(true);
+        }
       }
-    }
+    };
 
     loadTicketData();
-  }, [ticket.id])
-
-  useEffect(() => {
-    supabase.from('messages').select('*').eq('ticket_id', ticket.id).order('created_at',{ascending:true})
-      .then(({ data }) => data && setMessages(data));
-    const chan = supabase
-      .channel(`messages-${ticket.id}`)
-      .on('postgres_changes',{ event: 'INSERT', schema: 'public', table: 'messages', filter: `ticket_id=eq.${ticket.id}` },
-         (p) => setMessages((m)=> [...m, p.new])
-      )
-      .subscribe();
-    return () => chan.unsubscribe();
   }, [ticket.id]);
 
-  const appendMessage = (m:any) => setMessages((prev)=> [...prev, m]);
+  // Subscribe to ticket status change (only for medium/high)
+  useEffect(() => {
+    if (priority === 'Low') return; // skip for bot-only tickets
+
+    const ticketChannel = supabase
+      .channel(`ticket-status-${ticket.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'tickets',
+          filter: `id=eq.${ticket.id}`,
+        },
+        (payload) => {
+          const newStatus = payload.new.status;
+          if (newStatus && newStatus !== status) {
+            setStatus(newStatus);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(ticketChannel);
+    };
+  }, [ticket.id, status, priority]);
+
+  // Subscribe to chat messages (for Assigned/Ongoing or Low)
+  useEffect(() => {
+    if (priority === 'Low' || status === 'Assigned' || status === 'Ongoing') {
+      const loadMessages = async () => {
+        const { data } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('ticket_id', ticket.id)
+          .order('created_at', { ascending: true });
+
+        if (data) {
+          setMessages(data);
+          setInitialLoad(true);
+        }
+      };
+
+      loadMessages();
+
+      const messageChannel = supabase
+        .channel(`messages-${ticket.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `ticket_id=eq.${ticket.id}`,
+          },
+          (payload) => {
+            setMessages((prev) => [...prev, payload.new]);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(messageChannel);
+      };
+    }
+  }, [status, priority, ticket.id]);
+
+  const appendMessage = (msg: any) => setMessages((prev) => [...prev, msg]);
 
   return (
     <div className="flex flex-col h-full">
       <div className="border-b p-4 bg-blue-50">
         <h2 className="text-xl font-bold">{ticket.name}</h2>
-        <p className="text-sm">{`${ticket.issue} – ${ticket.status}`}</p>
+        <p className="text-sm text-gray-600">
+          {ticket.issue} – <span className="font-medium">{status}</span>
+        </p>
       </div>
-      <MessageBox ticketId={ticket.id} messages={messages} appendMessage={appendMessage} senderType={'customer'} priority={priority} />
+
+      {priority === 'Low' ? (
+        !initialLoad ? (
+          <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
+            Loading bot response...
+          </div>
+        ) : (
+          <MessageBox
+            ticketId={ticket.id}
+            messages={messages}
+            appendMessage={appendMessage}
+            senderType="customer"
+            priority={priority}
+          />
+        )
+      ) : status !== 'Assigned' && status !== 'Ongoing' ? (
+        <div className="flex-1 flex items-center justify-center text-gray-500 text-lg italic px-6 text-center">
+          Your ticket has been submitted. Please wait while we assign an agent.
+        </div>
+      ) : !initialLoad ? (
+        <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
+          Loading chat...
+        </div>
+      ) : (
+        <MessageBox
+          ticketId={ticket.id}
+          messages={messages}
+          appendMessage={appendMessage}
+          senderType="customer"
+          priority={priority}
+        />
+      )}
     </div>
   );
 }
