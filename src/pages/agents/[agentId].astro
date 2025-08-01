@@ -1,0 +1,39 @@
+---
+import "@/styles/global.css";
+import AdminPanel from '@/react-components/AdminPanel';
+import ChatPanel from '@/react-components/ChatPanel';
+import { supabase } from '@/lib/supabaseClient';
+
+const { agentId } = Astro.params;
+
+const { data: agent } = await supabase
+  .from('agents')
+  .select('*')
+  .eq('id', agentId)
+  .single();
+
+if (!agent) {
+  throw new Error("Unauthorized. Agent not found.");
+}
+
+const role = agent.role;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{role === 'admin_agent' ? 'Admin Panel' : 'Support Chat'}</title>
+  </head>
+  <body class="h-screen m-0">
+    <main class="h-full w-full">
+      {
+        role === 'admin_agent'
+          ? <AdminPanel client:load />
+          : <ChatPanel client:load />
+      }
+    </main>
+  </body>
+</html>
