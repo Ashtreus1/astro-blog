@@ -243,3 +243,296 @@
   font-weight: 900;
   font-style: italic;
 }
+.custom-markdown {
+  font-family: 'Georgia', serif;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #1c1c1c;
+  max-width: 100%;
+  text-align: justify;
+}
+
+.custom-markdown p {
+  margin-bottom: 1.25em;
+}
+
+.custom-markdown strong {
+  font-weight: 600;
+}
+
+.custom-markdown em {
+  font-style: italic;
+}
+
+.custom-markdown a {
+  color: #014F86;
+  text-decoration: underline;
+}
+
+.custom-markdown a:hover {
+  color: #013f6c;
+}
+
+.custom-markdown ul,
+.custom-markdown ol {
+  margin-left: 1.25em;
+  margin-bottom: 1.25em;
+  padding-left: 1em;
+}
+
+.custom-markdown ul {
+  list-style-type: disc;
+}
+
+.custom-markdown ol {
+  list-style-type: decimal;
+}
+
+.custom-markdown li {
+  margin-bottom: 0.5em;
+}
+
+.custom-markdown blockquote {
+  border-left: 4px solid #ccc;
+  padding-left: 1em;
+  color: #555;
+  font-style: italic;
+  margin: 1.5em 0;
+}
+
+.custom-markdown h1,
+.custom-markdown h2,
+.custom-markdown h3,
+.custom-markdown h4,
+.custom-markdown h5,
+.custom-markdown h6 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  color: #111;
+  margin-top: 2em;
+  margin-bottom: 1em;
+  line-height: 1.4;
+}
+
+.custom-markdown h1 { font-size: 2.25rem; }
+.custom-markdown h2 { font-size: 1.75rem; }
+.custom-markdown h3 { font-size: 1.5rem; }
+.custom-markdown h4 { font-size: 1.25rem; }
+.custom-markdown h5 { font-size: 1rem; }
+.custom-markdown h6 { font-size: 0.875rem; }
+
+.custom-markdown code {
+  background-color: #f3f4f6;
+  color: #c7254e;
+  padding: 0.2em 0.4em;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95em;
+  border-radius: 4px;
+}
+
+.custom-markdown pre {
+  background-color: #f3f4f6;
+  padding: 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95em;
+  color: #2d2d2d;
+}
+
+
+/* Global Styles for the Chatbox */
+/* Chatbox container should use flex layout to distribute space */
+.chatbox {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Full height of the container */
+  padding: 16px;
+  justify-content: space-between; /* Ensures the input stays at the bottom */
+  gap: 16px;
+}
+
+/* Chatbox individual message styles */
+.chatbox .bot-message {
+  background-color: #d9f2ff;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  margin-left: 10px;
+  max-width: 70%;
+}
+
+.chatbox .user-message {
+  background-color: #cceeff;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  margin-left: auto;
+  max-width: 70%;
+}
+
+.chatbox .bot-message,
+.chatbox .user-message {
+  margin-bottom: 1rem;
+}
+
+.chatbox .bot img,
+.chatbox .user img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.chatbox .bot {
+  display: flex;
+  align-items: center;
+}
+
+.chatbox .user {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Form input style */
+.chatbox input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  height: 35px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+/* Submit button style */
+.chatbox button {
+  background-color: #3b82f6;
+  padding: 10px;
+  border-radius: 5px;
+  color: white;
+  height: 35px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.chatbox button:hover {
+  background-color: #2563eb;
+}
+
+/* Floating Chat Button */
+.fixed {
+  position: fixed;
+}
+
+.bg-blue-500 {
+  background-color: #3b82f6;
+}
+
+.bg-blue-600 {
+  background-color: #2563eb;
+}
+
+.text-white {
+  color: white;
+}
+
+.rounded-full {
+  border-radius: 50%;
+}
+
+.p-3 {
+  padding: 12px;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.w-80 {
+  width: 20rem;
+}
+
+.h-96 {
+  height: 24rem;
+}
+
+.bg-white {
+  background-color: white;
+}
+
+.border {
+  border: 1px solid #ddd;
+}
+
+/* FAQ card styles */
+.faq-card {
+  max-height: 120px;
+  overflow-y: scroll;
+  margin-bottom: 1rem; /* Adds spacing between FAQ and messages */
+}
+
+.faq-card h5 {
+  font-style: italic;
+  font-size: 1rem;
+  color: #4b4b4b;
+  margin-bottom: 0.75rem;
+}
+
+.faq-card ul {
+  padding-left: 1.5rem;
+}
+
+.faq-card li {
+  margin-bottom: 0.5rem;
+}
+
+.faq-card a {
+  color: #1e40af; /* Tailwind text-blue-700 */
+  text-decoration: none;
+}
+
+.faq-card a:hover {
+  text-decoration: underline;
+}
+
+/* Ensure the scrollbars work well */
+.faq-card {
+  max-height: 120px;
+  overflow-y: scroll;
+}
+
+.chatbox .form-control {
+  background-color: #d9f2ff;
+}
+
+/* Space between messages and input */
+.chatbox .form-control {
+  margin-top: 20px;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+/* Close Button for Chat */
+.bg-red-500 {
+  background-color: #ef4444;
+}
+
+.bg-red-500:hover {
+  background-color: #dc2626;
+}
+
+.p-1 {
+  padding: 0.25rem;
+}
+
+.flex {
+  display: flex;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.p-2 {
+  padding: 0.5rem;
+}

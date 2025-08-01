@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog, DialogTrigger, DialogContent,
@@ -14,65 +14,52 @@ import {
   Select, SelectTrigger, SelectValue,
   SelectContent, SelectGroup, SelectLabel, SelectItem
 } from '@/components/ui/select';
-import { supabase } from '@/lib/supabaseClient';
 
-interface Issue {
-  issue: string;
-  priority: 'Low' | 'Medium' | 'High';
-}
+import { useSlaIssues } from '@/hooks/useSlaIssues';
+import { useCreateCustomer } from '@/hooks/useCreateCustomer';
+import { useCreateTicket } from '@/hooks/useCreateTicket';
 
 export default function RequestTicketModal() {
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [issue, setIssue] = useState('');
-  const [priority, setPriority] = useState<'Low' | 'Medium' | 'High' | ''>('');
   const [loading, setLoading] = useState(false);
-  const [issuesList, setIssuesList] = useState<Issue[]>([]);
 
-  useEffect(() => {
-    const fetchIssues = async () => {
-      const { data, error } = await supabase
-        .from('sla_policy')
-        .select('issue, priority');
-
-      if (error) {
-        console.error('Error fetching issues:', error);
-      } else {
-        setIssuesList(data as Issue[]);
-      }
-    };
-
-    fetchIssues();
-  }, []);
+  const { issues } = useSlaIssues();
+  const createCustomer = useCreateCustomer();
+  const createTicket = useCreateTicket();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const selected = issuesList.find(i => i.issue === issue);
-    const issuePriority = selected?.priority ?? 'Low';
+    const selected = issues.find(i => i.issue === issue);
+    const priority = selected?.priority ?? 'Low';
 
-    const { data, error } = await supabase.from('tickets').insert([
-      { name, issue, priority: issuePriority, status: 'Open' }
-    ]).select().single();
-
-    setLoading(false);
-
-    if (error) {
-      console.error(error);
-      alert('Failed to submit ticket.');
+    const { data: customer, error: customerError } = await createCustomer(name, email, issue);
+    if (customerError || !customer) {
+      setLoading(false);
+      alert('Customer error. Please try again.');
       return;
     }
 
-    // If priority is Low, call the bot
-    if (issuePriority.toLowerCase() === 'low') {
+    const { data: ticket, error: ticketError } = await createTicket(customer.id, issue, priority);
+    setLoading(false);
+
+    if (ticketError || !ticket) {
+      alert('Ticket error. Please try again.');
+      return;
+    }
+
+    if (priority.toLowerCase() === 'low') {
       await fetch('/api/bot-reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userMessage: issue, ticketId: data.id }),
+        body: JSON.stringify({ userMessage: issue, ticketId: ticket.id }),
       });
     }
 
-    window.location.href = `/chats/${data.id}`;
+    window.location.href = `/chats/${ticket.id}`;
   };
 
   return (
@@ -87,11 +74,15 @@ export default function RequestTicketModal() {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-6">
           <div className="grid gap-3">
-            <Label htmlFor="name-1">Name</Label>
-            <Input id="name-1" value={name} onChange={e => setName(e.currentTarget.value)} required />
+            <Label htmlFor="name">Name</Label>
+            <Input id="name" value={name} onChange={e => setName(e.currentTarget.value)} required />
           </div>
           <div className="grid gap-3">
-            <Label htmlFor="issues-1">Issue</Label>
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" type="email" value={email} onChange={e => setEmail(e.currentTarget.value)} />
+          </div>
+          <div className="grid gap-3">
+            <Label htmlFor="issue">Issue</Label>
             <Select onValueChange={val => setIssue(val)} required>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select an issue" />
@@ -99,15 +90,11 @@ export default function RequestTicketModal() {
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Issues</SelectLabel>
-                  {issuesList.length > 0 ? (
-                    issuesList.map((opt) => (
-                      <SelectItem key={opt.issue} value={opt.issue}>
-                        {opt.issue}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem disabled value="">Loading...</SelectItem>
-                  )}
+                  {issues.map((opt) => (
+                    <SelectItem key={opt.issue} value={opt.issue}>
+                      {opt.issue}
+                    </SelectItem>
+                  ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -117,7 +104,8 @@ export default function RequestTicketModal() {
             <div className="grid gap-2">
               <Label htmlFor="terms">Accept SLA</Label>
               <p className="text-sm">
-                By clicking this checkbox, you agree to the <a href="/sla" className="underline">service level agreement</a>.
+                By clicking this checkbox, you agree to the{' '}
+                <a href="/sla" className="underline">service level agreement</a>.
               </p>
             </div>
           </div>

@@ -27,6 +27,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 */
 import HeroImage from '@/react-components/HeroImage';
 import RequestTicketModal from '@/react-components/RequestTicketModal';
+import ChatPopup from '@/react-components/ChatPopup';
 
 const pageTitle = "Home";
 ---
@@ -48,5 +49,6 @@ const pageTitle = "Home";
     </div>
 
     <HeroImage client:load/>
+    <ChatPopup client:load>
   </div>
 </BaseLayout>
