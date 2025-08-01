@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import AssignTicketModal from "./AssignTicketModal";
+import { ArrowDownToDot, MessagesSquare } from "lucide-react";
 
 type Agent = {
   id: string;
@@ -11,7 +12,7 @@ type Agent = {
 export default function AgentList() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
 
   useEffect(() => {
     fetchAgents();
@@ -49,20 +50,29 @@ export default function AgentList() {
               className="bg-white px-4 py-2 rounded shadow flex justify-between items-center"
             >
               <span>{agent.name}</span>
-              <button
-                onClick={() => setShowModal(true)}
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-              >
-                Assign Ticket
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowAssignModal(true)}
+                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                >
+                  <ArrowDownToDot className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() =>
+                    (window.location.href = `/logs?agentId=${agent.id}`)
+                  }
+                  className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                >
+                  <MessagesSquare className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Modal Component */}
-      {showModal && (
-        <AssignTicketModal />
+      {showAssignModal && (
+        <AssignTicketModal onClose={() => setShowAssignModal(false)} />
       )}
     </div>
   );
