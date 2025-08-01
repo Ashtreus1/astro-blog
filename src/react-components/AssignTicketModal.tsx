@@ -1,4 +1,3 @@
-// src/react-components/AssignTicketModal.tsx
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import AgentHistory from "./AgentHistory"; // ⬅ Import the separated component

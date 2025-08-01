@@ -24,7 +24,6 @@ export default function AdminPanel() {
       </div>
 
       <AgentList />
-      <AssignTicketModal />
     </div>
   );
 }

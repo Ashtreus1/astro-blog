@@ -11,9 +11,20 @@
 
   Pakitingnan nalang ang content nito. 
 */
-
-
 import BaseLayout from '@/layouts/BaseLayout.astro';
+
+
+/*
+  Dito naman ay ang mga React Components na ginamit natin sa Home Page.
+  Feel free to check the content nalang ng dalawang React Components.
+
+  BTW, kung nagtataka ka bakit hindi ko nalang nilagay ang mga components na 'to
+  inside ng 'components' directory, dahil ang dedicated na mga components na nilagay
+  ko lang dito is naka-based in Astro not React.
+
+  So, pinaghiwalay ko nalang yung 'react-components' (UI components using React) and 
+  'components' (UI components using Astro) directory for better modularity.
+*/
 import HeroImage from '@/react-components/HeroImage';
 import RequestTicketModal from '@/react-components/RequestTicketModal';
 import ChatPopup from '@/react-components/ChatPopup';
@@ -23,6 +34,7 @@ const pageTitle = "Home";
 
 <BaseLayout title={pageTitle}>
   <div class="flex flex-col md:flex-row items-center justify-center md:justify-between min-h-screen px-8">
+
     <!-- Content Column -->
     <div class="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left space-y-4 ml-20">
       <h1 class="text-4xl font-bold text-gray-900">
