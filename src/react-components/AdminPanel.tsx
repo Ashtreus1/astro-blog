@@ -3,6 +3,7 @@ import TicketStats from "@/react-components/TicketStats";
 import AgentList from "@/react-components/AgentLists";
 import ResponseCharts from "@/react-components/ResponseCharts";
 import AssignTicketModal from "@/react-components/AssignTicketModal";
+import TicketActions from "./TicketActionsUI";
 
 export default function AdminPanel() {
   return (

@@ -1,0 +1,79 @@
+---
+import { supabase } from '@/lib/supabaseClient';
+
+const url = new URL(Astro.request.url);
+const agentId = url.searchParams.get('agentId');
+
+let messages = [];
+let tickets = [];
+let agentName = '';
+
+if (agentId) {
+  const { data: msgData } = await supabase
+    .from('messages')
+    .select('id, ticket_id, sender, content, created_at')
+    .eq('sender', agentId)
+    .order('created_at', { ascending: false });
+
+  const { data: ticketData } = await supabase
+    .from('tickets')
+    .select('id, customer_name, status, created_at');
+
+  const { data: agentData } = await supabase
+    .from('agents')
+    .select('name')
+    .eq('id', agentId)
+    .single();
+
+  messages = msgData || [];
+  tickets = ticketData || [];
+  agentName = agentData?.name || '';
+}
+
+function getTicketDetails(ticketId) {
+  return tickets.find((t) => t.id === ticketId) || {};
+}
+---
+
+<html>
+  <head>
+    <title>Agent Logs</title>
+  </head>
+  <body class="font-sans bg-gray-50 min-h-screen p-8">
+    <h1 class="text-2xl font-bold mb-6">
+        
+        Activity Logs
+        {agentName && (
+        <span class="text-gray-600 text-sm font-medium ml-2"> -  {agentName}</span>
+      )}</h1>
+      
+      
+    
+
+    {messages.length === 0 ? (
+      <p class="text-gray-500 italic">No messages found for this agent.</p>
+    ) : (
+      <div class="space-y-4">
+        {messages.map((msg) => {
+          const ticket = getTicketDetails(msg.ticket_id);
+          return (
+            <div class="border rounded-lg bg-white p-4 shadow">
+              <div class="flex justify-between items-center mb-2">
+                <p>
+                  <span class="font-semibold">Customer:</span> {ticket.customer_name ?? 'N/A'}
+                </p>
+                <p class="text-sm text-gray-500">
+                  {new Date(ticket.created_at || msg.created_at).toLocaleDateString()}
+                </p>
+              </div>
+              <p>
+                <span class="font-semibold">Status:</span> {ticket.status ?? 'Unresolved'}
+              </p>
+              <p class="mt-2 text-gray-700">{msg.content}</p>
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </body>
+</html>
