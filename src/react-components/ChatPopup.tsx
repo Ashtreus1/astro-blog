@@ -8,12 +8,12 @@ import { Button } from '@/components/ui/button';
 
 // FAQ Component
 const FAQ = () => (
-  <div className="faq-card p-4 border rounded mt-2 overflow-auto max-h-32">
-    <h5 className="fst-italic">Frequently Asked Questions:</h5>
+  <div className="faq-card p-2 border rounded mt-1 overflow-auto max-h-20 text-sm">
+    <h5 className="italic text-sm mb-2 text-gray-700">Frequently Asked Questions:</h5>
     <ul className="list-disc pl-4">
-      <li><a href="/blogs/password-reset" className="text-style-primary">How do I submit a ticket?</a></li>
-      <li><a href="/blogs/response-time" className="text-style-primary">How long does it take to get a response?</a></li>
-      <li><a href="/blogs/track-ticket" className="text-style-primary">How do I track the status of my ticket?</a></li>
+      <li><a href="/blogs/password-reset" className="text-blue-700">How do I submit a ticket?</a></li>
+      <li><a href="/blogs/response-time" className="text-blue-700">How long does it take to get a response?</a></li>
+      <li><a href="/blogs/track-ticket" className="text-blue-700">How do I track my ticket?</a></li>
     </ul>
   </div>
 );
@@ -37,11 +37,9 @@ const ChatBox = ({ senderType, priority }: { senderType: string; priority: strin
     const trimmed = msg.trim();
     if (!trimmed) return;
 
-    // Append user message
     appendMessage({ content: trimmed, sender: senderType });
     setMsg('');
 
-    // Call bot if low priority
     if (senderType === 'customer' && priority === 'Low') {
       try {
         const res = await fetch('/api/bot-reply-popup', {
@@ -68,18 +66,18 @@ const ChatBox = ({ senderType, priority }: { senderType: string; priority: strin
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full text-sm">
       {/* Message Display Area */}
-      <div className="flex-1 overflow-y-auto pr-1 space-y-2">
-        <div className="bot-message text-sm text-gray-500 mb-2">
+      <div className="flex-1 overflow-y-auto pr-1 space-y-1 text-sm">
+        <div className="bot-message text-xs text-gray-500 mb-2">
           How may I help you?
         </div>
 
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.sender === senderType ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-xs sm:max-w-md px-4 py-2 rounded-xl shadow-sm text-sm 
-              ${m.sender === senderType ? 'bg-green-200 text-right rounded-br-none' : 'bg-blue-100 text-left rounded-bl-none'}`}>
-              <div className="text-xs font-semibold text-gray-600 mb-1">{m.sender}</div>
+            <div className={`max-w-[85%] px-3 py-1.5 rounded-md shadow-sm text-xs
+              ${m.sender === senderType ? 'bg-green-100 text-right rounded-br-none' : 'bg-blue-100 text-left rounded-bl-none'}`}>
+              <div className="text-[10px] font-semibold text-gray-600 mb-1">{m.sender}</div>
               <ReactMarkdown children={m.content} remarkPlugins={[remarkGfm]} />
             </div>
           </div>
@@ -89,14 +87,14 @@ const ChatBox = ({ senderType, priority }: { senderType: string; priority: strin
       </div>
 
       {/* Input Form */}
-      <form onSubmit={handleSubmit} className="flex gap-2 p-2 border-t bg-white">
+      <form onSubmit={handleSubmit} className="flex gap-1 p-2 border-t bg-white">
         <Input
           value={msg}
           onChange={(e) => setMsg(e.currentTarget.value)}
-          placeholder="Type your message..."
-          className="flex-1 p-2 rounded-md"
+          placeholder="Type a message..."
+          className="flex-1 px-2 py-1.5 text-sm rounded-md"
         />
-        <Button type="submit" className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">
+        <Button type="submit" className="bg-blue-500 text-white px-3 py-1.5 text-sm rounded hover:bg-blue-600">
           Send
         </Button>
       </form>
@@ -120,22 +118,22 @@ const ChatApp = () => {
 
       {/* Chat Modal */}
       {isChatVisible && (
-        <div className="fixed bottom-4 right-4 w-[400px] h-[600px] sm:w-[500px] sm:h-[600px] bg-white shadow-2xl rounded-xl border flex flex-col">
+        <div className="fixed bottom-4 right-4 w-[280px] h-[400px] sm:w-[320px] sm:h-[420px] bg-white shadow-2xl rounded-xl border flex flex-col text-sm">
           {/* Modal Header */}
-          <div className="flex items-center justify-between p-3 bg-black text-white rounded-t-xl">
-            <h1 className="text-lg font-semibold">Customer Support</h1>
-            <button onClick={() => setChatVisible(false)} className="bg-red-500 px-3 py-1 rounded hover:bg-red-600">
+          <div className="flex items-center justify-between px-3 py-2 bg-black text-white rounded-t-xl text-sm">
+            <h1 className="text-sm font-semibold">Customer Support</h1>
+            <button onClick={() => setChatVisible(false)} className="bg-red-500 px-2 py-0.5 rounded hover:bg-red-600 text-xs">
               X
             </button>
           </div>
 
           {/* FAQ */}
-          <div className="px-3 pt-2 pb-1">
+          <div className="px-2 pt-2">
             <FAQ />
           </div>
 
           {/* Chat Body */}
-          <div className="flex-1 px-3 pb-3 overflow-hidden">
+          <div className="flex-1 px-1 pb-3 overflow-hidden">
             <ChatBox senderType="customer" priority="Low" />
           </div>
         </div>

@@ -1,6 +1,7 @@
 // src/react-components/AssignTicketModal.tsx
 import React, { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
+import AgentHistory from "./AgentHistory"; // ⬅ Import the separated component
 
 export default function AssignTicketModal() {
   const [show, setShow] = useState(false);
@@ -9,6 +10,9 @@ export default function AssignTicketModal() {
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Handle AgentHistory modal
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     if (show) fetchData();
@@ -40,21 +44,29 @@ export default function AssignTicketModal() {
       console.error(error);
     } else {
       alert("Ticket assigned successfully!");
-      setShow(false); // close modal from within
+      setShow(false);
     }
   }
 
   return (
     <>
-      {/* Trigger button */}
-      <button
-        onClick={() => setShow(true)}
-        className="bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        Assign Ticket
-      </button>
+      {/* Buttons */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setShow(true)}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Assign Ticket
+        </button>
+        <button
+          onClick={() => setShowHistory(true)}
+          className="bg-green-500 text-white px-4 py-2 rounded"
+        >
+          Conversation History
+        </button>
+      </div>
 
-      {/* Modal */}
+      {/* Assign Ticket Modal */}
       {show && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-96 space-y-4">
@@ -113,6 +125,9 @@ export default function AssignTicketModal() {
           </div>
         </div>
       )}
+
+      {/* Agent History Modal */}
+      {showHistory && <AgentHistory onClose={() => setShowHistory(false)} />}
     </>
   );
 }

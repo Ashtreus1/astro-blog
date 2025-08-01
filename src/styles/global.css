@@ -346,7 +346,7 @@
 .chatbox {
   display: flex;
   flex-direction: column;
-  height: 100%; /* Full height of the container */
+  max-height: 100%; /* Full height of the container */
   padding: 16px;
   justify-content: space-between; /* Ensures the input stays at the bottom */
   gap: 16px;
