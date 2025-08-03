@@ -26,58 +26,41 @@ export default function MessageBox({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const chan = supabase
-      .channel(`messages-${ticketId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `ticket_id=eq.${ticketId}`,
-        },
-        (payload) => {
-          appendMessage(payload.new);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(chan);
-    };
-  }, [ticketId, appendMessage]);
-
-  useEffect(() => {
     containerRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!msg.trim()) return;
+    const content = msg.trim();
+    if (!content) return;
 
     const newMessage = {
       ticket_id: ticketId,
-      content: msg,
+      content,
       sender: senderType,
       created_at: new Date().toISOString(),
     };
 
-    appendMessage(newMessage); // Optimistically show user message
+    // Optimistically append only if sender is customer
+    if (senderType === 'customer') {
+      appendMessage(newMessage);
+    }
+
     setMsg('');
 
     const { error } = await supabase.from('messages').insert([newMessage]);
     if (error) {
-      console.error('Failed to insert message:', error);
+      console.error('Failed to send message:', error);
       return;
     }
 
-    // Send bot reply if Low priority
+    // Bot reply for low-priority tickets
     if (senderType === 'customer' && priority === 'Low') {
       try {
         const res = await fetch('/api/bot-reply', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ticketId, userMessage: msg, priority }),
+          body: JSON.stringify({ ticketId, userMessage: content, priority }),
         });
 
         if (res.ok) {
@@ -157,7 +140,7 @@ export default function MessageBox({
         <Input
           value={msg}
           onChange={(e) => setMsg(e.currentTarget.value)}
-          placeholder="Type message..."
+          placeholder="Type your message..."
           className="flex-1"
         />
         <Button type="submit">Send</Button>

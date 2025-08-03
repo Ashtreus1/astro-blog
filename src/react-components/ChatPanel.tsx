@@ -1,43 +1,58 @@
 'use client';
+
 import { useEffect, useState } from 'react';
-import TicketSidebar from './TicketSidebar';
-import MessageBox from './MessageBox';
+import TicketSidebar from '@/react-components/TicketSidebar';
+import MessageBox from '@/react-components/MessageBox';
 import { supabase } from '@/lib/supabaseClient';
+import { useFetchTickets } from '@/hooks/useFetchTickets';
+import type { Ticket } from '@/hooks/useFetchTickets';
 
-interface Ticket { id: string; name: string; issue: string; status: string; }
-
-export default function ChatPanel() {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+export default function ChatPanel({ agentId }: { agentId: string }) {
+  const tickets = useFetchTickets(agentId);
   const [selected, setSelected] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase.from<Ticket>('tickets').select('*').then(({ data }) => {
-      if (data) { setTickets(data); setSelected(data[0] ?? null); }
-    });
-    const ticketSub = supabase
-      .channel('tickets')
-      .on('postgres_changes',{ event: 'INSERT', schema: 'public', table: 'tickets' },
-         (p) => setTickets((t) => [...t, p.new as Ticket])
-      )
-      .subscribe();
-    return () => ticketSub.unsubscribe();
-  }, []);
-
-  useEffect(() => {
     if (!selected) return;
-    supabase.from('messages').select('*').eq('ticket_id', selected.id).order('created_at',{ascending:true})
-      .then(({ data }) => data && setMessages(data));
+
+    let isMounted = true;
+
+    const fetchMessages = async () => {
+      const { data } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('ticket_id', selected.id)
+        .order('created_at', { ascending: true });
+
+      if (isMounted) setMessages(data || []);
+    };
+
+    fetchMessages();
+
     const chan = supabase
       .channel(`messages-${selected.id}`)
-      .on('postgres_changes',{ event: 'INSERT', schema: 'public', table: 'messages', filter: `ticket_id=eq.${selected.id}` },
-         (p) => setMessages((m)=> [...m, p.new])
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `ticket_id=eq.${selected.id}`,
+        },
+        (payload) => {
+          setMessages((prev) => {
+            const exists = prev.some((m) => m.id === payload.new.id);
+            return exists ? prev : [...prev, payload.new];
+          });
+        }
       )
       .subscribe();
-    return () => chan.unsubscribe();
-  }, [selected]);
 
-  const appendMessage = (m:any) => setMessages((prev)=> [...prev, m]);
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(chan);
+    };
+  }, [selected]);
 
   return (
     <div className="flex h-full">
@@ -49,11 +64,17 @@ export default function ChatPanel() {
               <h2 className="text-xl font-bold">{selected.name}</h2>
               <p className="text-sm">{`${selected.issue} – ${selected.status}`}</p>
             </div>
-            <MessageBox ticketId={selected.id} messages={messages} appendMessage={appendMessage} senderType={"support"} />
+            <MessageBox
+              ticketId={selected.id}
+              messages={messages}
+              appendMessage={() => {}}
+              senderType="support"
+              priority={selected.priority}
+            />
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">
-            No tickets yet.
+            No assigned tickets yet.
           </div>
         )}
       </div>

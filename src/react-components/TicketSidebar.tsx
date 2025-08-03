@@ -1,18 +1,18 @@
 'use client';
-import { Ticket, useFetchTickets } from '@/hooks/useFetchTickets';
+
+import type { Ticket } from '@/hooks/useFetchTickets';
 
 interface Props {
+  tickets: Ticket[];
   selected: Ticket | null;
   onSelect: (ticket: Ticket) => void;
 }
 
-export default function TicketSidebar({ selected, onSelect }: Props) {
-  const tickets = useFetchTickets();
-
+export default function TicketSidebar({ tickets, selected, onSelect }: Props) {
   return (
     <aside className="w-1/4 border-r overflow-y-auto h-full">
       <ul>
-        {tickets.map(ticket => (
+        {tickets.map((ticket) => (
           <li key={ticket.id}>
             <button
               onClick={() => onSelect(ticket)}

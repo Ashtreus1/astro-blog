@@ -32,7 +32,7 @@ const role = agent.role;
       {
         role === 'admin_agent'
           ? <AdminPanel client:load />
-          : <ChatPanel client:load />
+          : <ChatPanel client:load agentId={agentId} />
       }
     </main>
   </body>

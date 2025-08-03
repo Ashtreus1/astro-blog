@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import MessageBox from '@/react-components/MessageBox';
-import { supabase } from '@/lib/supabaseClient';
 import OverdueTicketReport from '@/react-components/OverdueTicketReport';
+import { supabase } from '@/lib/supabaseClient';
 
 interface Ticket {
   id: string;
@@ -11,46 +11,35 @@ interface Ticket {
   issue: string;
   status: string;
   customer_id: string;
+  priority: 'Low' | 'Medium' | 'High';
 }
 
 export default function CustomerChat({ ticket }: { ticket: Ticket }) {
   const [messages, setMessages] = useState<any[]>([]);
-  const [priority, setPriority] = useState<'Low' | 'Medium' | 'High' | ''>('');
   const [status, setStatus] = useState(ticket.status);
   const [initialLoad, setInitialLoad] = useState(false);
 
-  // Load ticket info and messages
+  // Load messages and latest ticket info
   useEffect(() => {
-    const loadTicketData = async () => {
-      const { data, error } = await supabase
-        .from('tickets')
-        .select('priority, status')
-        .eq('id', ticket.id)
-        .single();
+    const load = async () => {
+      const { data } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('ticket_id', ticket.id)
+        .order('created_at', { ascending: true });
 
-      if (!error && data) {
-        setPriority(data.priority);
-        setStatus(data.status);
-
-        const { data: botMessages } = await supabase
-          .from('messages')
-          .select('*')
-          .eq('ticket_id', ticket.id)
-          .order('created_at', { ascending: true });
-
-        setMessages(botMessages || []);
-        setInitialLoad(true);
-      }
+      setMessages(data || []);
+      setInitialLoad(true);
     };
 
-    loadTicketData();
+    load();
   }, [ticket.id]);
 
-  // Subscribe to ticket status (if not Low)
+  // Subscribe to ticket status updates (skip Low priority)
   useEffect(() => {
-    if (priority === 'Low') return;
+    if (ticket.priority === 'Low') return;
 
-    const ticketChannel = supabase
+    const chan = supabase
       .channel(`ticket-status-${ticket.id}`)
       .on(
         'postgres_changes',
@@ -69,19 +58,17 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(ticketChannel);
-    };
-  }, [ticket.id, status, priority]);
+    return () => supabase.removeChannel(chan);
+  }, [ticket.id, ticket.priority, status]);
 
-  // Subscribe to messages
+  // Subscribe to new messages
   useEffect(() => {
     if (
-      priority === 'Low' ||
+      ticket.priority === 'Low' ||
       status === 'Assigned' ||
       status === 'Ongoing'
     ) {
-      const messageChannel = supabase
+      const chan = supabase
         .channel(`messages-${ticket.id}`)
         .on(
           'postgres_changes',
@@ -100,15 +87,11 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
         )
         .subscribe();
 
-      return () => {
-        supabase.removeChannel(messageChannel);
-      };
+      return () => supabase.removeChannel(chan);
     }
-  }, [status, priority, ticket.id]);
+  }, [ticket.id, ticket.priority, status]);
 
-  const appendMessage = (msg: any) => {
-    setMessages((prev) => [...prev, msg]);
-  };
+  // const appendMessage = (m: any) => setMessages((prev) => [...prev, m]);
 
   return (
     <div className="flex flex-col h-full">
@@ -119,7 +102,7 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
         </p>
       </div>
 
-      {priority === 'Low' ? (
+      {ticket.priority === 'Low' ? (
         !initialLoad ? (
           <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
             Loading bot response...
@@ -128,9 +111,9 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
           <MessageBox
             ticketId={ticket.id}
             messages={messages}
-            appendMessage={appendMessage}
+            appendMessage={() => {}}
             senderType="customer"
-            priority={priority}
+            priority={ticket.priority}
           />
         )
       ) : status !== 'Assigned' && status !== 'Ongoing' ? (
@@ -145,9 +128,9 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
         <MessageBox
           ticketId={ticket.id}
           messages={messages}
-          appendMessage={appendMessage}
+          appendMessage={() => {}}
           senderType="customer"
-          priority={priority}
+          priority={ticket.priority}
         />
       )}
 
