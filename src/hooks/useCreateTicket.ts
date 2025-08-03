@@ -6,6 +6,10 @@ export const useCreateTicket = () => {
     issue: string,
     priority: 'Low' | 'Medium' | 'High'
   ) => {
+    let response_time_seconds = 0;
+    if (priority === 'High') response_time_seconds = 300;
+    else if (priority === 'Medium') response_time_seconds = 900;
+
     const { data, error } = await supabase
       .from('tickets')
       .insert([
@@ -13,7 +17,8 @@ export const useCreateTicket = () => {
           customer_id: customerId,
           issue,
           priority,
-          status: 'Open'
+          status: 'Open',
+          response_time_seconds
         }
       ])
       .select()

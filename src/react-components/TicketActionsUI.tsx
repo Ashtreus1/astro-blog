@@ -1,9 +1,8 @@
 'use client';
 import { useState } from 'react';
-import AssignTicketModal from './AssignTicketModal';
-import AgentHistory from './AgentHistory';
-import { ArrowDownToDot } from 'lucide-react';
-import { MessagesSquare } from 'lucide-react';
+import AssignTicketModal from '@/react-components/AssignTicketModal';
+import AgentHistory from '@/react-components/AgentHistory';
+import { ArrowDownToDot, MessagesSquare } from 'lucide-react';
 
 export default function TicketActions() {
   const [showAssign, setShowAssign] = useState(false);

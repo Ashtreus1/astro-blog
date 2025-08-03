@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
-import AssignTicketModal from "./AssignTicketModal";
+import { supabase } from "@/lib/supabaseClient";
+import AssignTicketModal from "@/react-components/AssignTicketModal";
 import { ArrowDownToDot, MessagesSquare } from "lucide-react";
 
 type Agent = {
@@ -51,12 +51,12 @@ export default function AgentList() {
             >
               <span>{agent.name}</span>
               <div className="flex gap-2">
-                <button
+                {/*<button
                   onClick={() => setShowAssignModal(true)}
                   className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                 >
                   <ArrowDownToDot className="w-5 h-5" />
-                </button>
+                </button>*/}
                 <button
                   onClick={() =>
                     (window.location.href = `/logs?agentId=${agent.id}`)

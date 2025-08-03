@@ -1,14 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import MessageBox from './MessageBox';
+import MessageBox from '@/react-components/MessageBox';
 import { supabase } from '@/lib/supabaseClient';
+import OverdueTicketReport from '@/react-components/OverdueTicketReport';
 
 interface Ticket {
   id: string;
   name: string;
   issue: string;
   status: string;
+  customer_id: string;
 }
 
 export default function CustomerChat({ ticket }: { ticket: Ticket }) {
@@ -148,6 +150,8 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
           priority={priority}
         />
       )}
+
+      <OverdueTicketReport customerId={ticket.customer_id} />
     </div>
   );
 }
