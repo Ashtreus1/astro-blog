@@ -1,118 +1,129 @@
+can you fix the height or something of my blogs.astro, the content is to high and it is getting covered by the navbar:
+
 ---
-/*
-  "Blogs" page ng application.
-
-  ➤ Ginagamitan natin ng `BaseLayout` component para magkaroon ng consistent layout 
-     (shared navigation, global styles, etc.) across all pages.
-
-  ➤ Nagde-define tayo ng dynamic page title gamit ang `pageTitle` constant 
-     na pinapasa natin bilang prop sa `BaseLayout`.
-
-  ➤ Sa page na ito, meron tayong Articles Section na nahahati sa dalawang bahagi:
-
-     1. **Article Card (Left Section)**  
-        ➤ Isang malaking card na nagpapakita ng selected article content  
-        ➤ May title, description, at image na dynamic ang laman  
-        ➤ On click, mag-oopen ito ng full article (`openFullArticle()` function)
-
-     2. **Scrollable Article List (Right Section)**  
-        ➤ Listahan ng iba't-ibang articles na pwedeng i-click  
-        ➤ Kada item ay may `onclick="selectArticle(...)"` event  
-        ➤ Kapag kinlick ang item, napapalitan ang content sa left card
-
-  ➤ Gumagamit tayo ng external JS file na `articles.js` (naka `defer`) 
-     para i-handle ang interactivity tulad ng article switching.
-
-  ➤ Ang layout ng articles ay responsive gamit ang Tailwind CSS utility classes:
-     - `grid-cols-1` sa mobile
-     - `grid-cols-2` sa medium screens pataas
-*/
-
 import BaseLayout from '@/layouts/BaseLayout.astro';
+
 
 const pageTitle = "Blogs";
 ---
 
 <BaseLayout title={pageTitle}>
   <!-- Articles Section -->
-  <div class="max-w-7xl mx-auto px-4 py-10">
-    <h3 class="text-gray-700 text-center text-4xl font-bold mb-8">Articles</h3>
+  <div class="max-w-7xl mx-auto px-4 pt-[8.5rem] pb-10">
+    
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-      <!-- LEFT SECTION: Main Article Card -->
-      <div>
-        <div
-          id="articleCard"
-          class="bg-[#CAF0F8] rounded-[14px] px-8 py-10 text-center shadow-sm transition duration-200 ease-in-out transform hover:-translate-y-[3px] hover:shadow-lg h-[400px] flex flex-col justify-center items-center cursor-pointer"
-          onclick="openFullArticle()"
-        >
-          <!-- Article image -->
-          <img
-            id="articleImg"
-            src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png"
-            alt="Password Reset"
-            class="max-w-[130px] mb-5"
-          />
+  <!-- LEFT SECTION: Main Article Card -->
+<div class="h-[460px] flex flex-col">
+  <div
+    id="articleCard"
+    class="bg-[#CAF0F8] rounded-[14px] px-8 pt-10 pb-4 text-center shadow-sm transition duration-200 ease-in-out transform hover:-translate-y-[3px] hover:shadow-lg flex flex-col justify-between items-center cursor-pointer flex-1"
+    onclick="openFullArticle()"
+  >
+    <div class="flex flex-col items-center justify-center flex-grow">
+      <img
+        id="articleImg"
+        src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png"
+        alt="Password Reset"
+        class="max-w-[130px] mb-5"
+      />
+      <h6 id="articleTitle" class="text-[#003366] text-[1.35rem] font-semibold mb-2">
+        Password Reset
+      </h6>
+      <p
+        id="articleDesc"
+        class="text-[#555] text-[1.08rem] leading-[1.5] max-w-[95%] mx-auto min-h-[60px]"
+      >
+        This teaches you how to reset your password
+      </p>
+    </div>
 
-          <!-- Article title -->
-          <h6 id="articleTitle" class="text-[#003366] text-[1.35rem] font-semibold mb-2">
-            Password Reset
-          </h6>
+    <!-- Buttons at bottom of the card -->
+    <div class="flex gap-4 justify-center mt-6">
+      <button
+        onclick="event.stopPropagation(); showPrevArticle()"
+        class="w-32 h-10 bg-[#0077B6] text-white rounded-md text-sm font-medium hover:bg-[#023E8A] transition"
+      >
+        ⬅ Previous
+      </button>
+      <button
+        onclick="event.stopPropagation(); showNextArticle()"
+        class="w-32 h-10 bg-[#0077B6] text-white rounded-md text-sm font-medium hover:bg-[#023E8A] transition"
+      >
+        Next ➡
+      </button>
+    </div>
+  </div>
+</div>
 
-          <!-- Article description -->
-          <p
-            id="articleDesc"
-            class="text-[#555] text-[1.08rem] leading-[1.5] max-w-[95%] mx-auto min-h-[60px]"
-          >
-            This teaches you how to reset your password
-          </p>
-        </div>
-      </div>
 
-      <!-- RIGHT SECTION: Scrollable Article List -->
-      <div>
-        <div class="max-h-[400px] overflow-y-auto overflow-x-hidden rounded-[10px] border border-gray-200">
-          <ul id="articleList" class="space-y-2 p-2">
-            <!-- Each list item represents a clickable article link -->
-            <!-- Kapag kinlick, tatawagin ang selectArticle(...) function -->
-            <li class="list-item active" onclick="selectArticle(this, 'Password Reset', 'This teaches you on how to reset your password', 'https://cdn-icons-png.flaticon.com/512/3064/3064197.png', 'password-reset')">
+
+<!-- RIGHT SECTION: Search + Scrollable Article List -->
+<div class="h-[460px] flex flex-col">
+  <!-- Search Bar -->
+  <div class="mb-3">
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="🔍 Search..."
+      onkeyup="filterArticles()"
+      class="w-full px-3 py-[0.4rem] text-xs rounded-[8px] border border-gray-300 bg-[#F0F8FF] text-gray-700 placeholder-gray-500 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-blue-300 transition"
+    />
+
+
+  </div>
+
+  <!-- TAG FILTERS -->
+<div class="flex flex-wrap gap-2 mb-4">
+  <button class="tag-btn active px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="All" onclick="filterByTag('All')">All</button>
+  <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Tickets" onclick="filterByTag('Tickets')">Tickets</button>
+  <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Account" onclick="filterByTag('Account')">Account</button>
+  <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Other" onclick="filterByTag('Other')">Other</button>
+</div>
+
+
+  <!-- Scrollable List -->
+  <div class="flex-1 overflow-y-auto rounded-[10px] border border-gray-200 shadow-sm p-3">
+    <ul id="articleList" class="space-y-2">
+      <li class="list-item active" data-tags="Account" onclick="selectArticle(this, 'Password Reset', 'This teaches you on how to reset your password', 'https://cdn-icons-png.flaticon.com/512/3064/3064197.png', 'password-reset')">
               Password Reset
             </li>
-            <li class="list-item" onclick="selectArticle(this, 'Where can I view my ticket history?', 'Steps to access and view all your past support tickets.', 'https://cdn-icons-png.flaticon.com/512/1828/1828961.png', 'ticket-history')">
+            <li class="list-item" data-tags="Tickets" onclick="selectArticle(this, 'Where can I view my ticket history?', 'Steps to access and view all your past support tickets.', 'https://cdn-icons-png.flaticon.com/512/1828/1828961.png', 'ticket-history')">
               Where can I view my ticket history?
             </li>
-            <li class="list-item" onclick="selectArticle(this, 'What information should I include in my support ticket?', 'Best practices for writing a complete and effective support ticket.', 'https://cdn-icons-png.flaticon.com/512/709/709496.png', 'ticket-information')">
+            <li class="list-item" data-tags="Tickets" onclick="selectArticle(this, 'What information should I include in my support ticket?', 'Best practices for writing a complete and effective support ticket.', 'https://cdn-icons-png.flaticon.com/512/709/709496.png', 'ticket-information')">
               What information should I include in my support ticket?
             </li>
-            <li class="list-item" onclick="selectArticle(this, 'Issues that affect usability but don’t block core functions.', 'Learn what issues impact usability and how to address them.', 'https://cdn-icons-png.flaticon.com/512/565/565491.png', 'usability-issues')">
+            <li class="list-item" data-tags="Other" onclick="selectArticle(this, 'Issues that affect usability but don’t block core functions.', 'Learn what issues impact usability and how to address them.', 'https://cdn-icons-png.flaticon.com/512/565/565491.png', 'usability-issues')">
               Issues that affect usability but don’t block core functions.
             </li>
-            <li class="list-item" onclick="selectArticle(this, 'How do I submit a ticket?', 'Step-by-step guide on submitting a new support ticket.', 'https://cdn-icons-png.flaticon.com/512/190/190411.png', 'submit-ticket')">
+            <li class="list-item" data-tags="Tickets" onclick="selectArticle(this, 'How do I submit a ticket?', 'Step-by-step guide on submitting a new support ticket.', 'https://cdn-icons-png.flaticon.com/512/190/190411.png', 'submit-ticket')">
               How do I submit a ticket?
             </li>
-            <li class="list-item" onclick="selectArticle(this, 'Can I update or edit my ticket after submitting it?', 'Learn how to update or add more details to a submitted ticket.', 'https://cdn-icons-png.flaticon.com/512/1250/1250615.png', 'edit-ticket')">
+            <li class="list-item" data-tags="Tickets" onclick="selectArticle(this, 'Can I update or edit my ticket after submitting it?', 'Learn how to update or add more details to a submitted ticket.', 'https://cdn-icons-png.flaticon.com/512/1250/1250615.png', 'edit-ticket')">
               Can I update or edit my ticket after submitting it?
             </li>
-            <li class="list-item" onclick="selectArticle(this, 'How do I track the status of my ticket?', 'Ways to monitor the progress and status of your active support tickets.', 'https://cdn-icons-png.flaticon.com/512/709/709690.png', 'track-ticket')">
+            <li class="list-item" data-tags="Tickets" onclick="selectArticle(this, 'How do I track the status of my ticket?', 'Ways to monitor the progress and status of your active support tickets.', 'https://cdn-icons-png.flaticon.com/512/709/709690.png', 'track-ticket')">
               How do I track the status of my ticket?
             </li>
-            <li class="list-item" onclick="selectArticle(this, 'How long does it take to receive a response?', 'Typical response times for submitted tickets.', 'https://cdn-icons-png.flaticon.com/512/992/992651.png', 'response-time')">
+            <li class="list-item" data-tags="Other" onclick="selectArticle(this, 'How long does it take to receive a response?', 'Typical response times for submitted tickets.', 'https://cdn-icons-png.flaticon.com/512/992/992651.png', 'response-time')">
               How long does it take to receive a response?
             </li>
-            <li class="list-item" onclick="selectArticle(this, 'Where can I view my invoices?', 'Learn where to locate and download all your past invoices.', 'https://cdn-icons-png.flaticon.com/512/3135/3135679.png', 'view-invoices')">
+            <li class="list-item" data-tags="Other" onclick="selectArticle(this, 'Where can I view my invoices?', 'Learn where to locate and download all your past invoices.', 'https://cdn-icons-png.flaticon.com/512/3135/3135679.png', 'view-invoices')">
               Where can I view my invoices?
             </li>
-            <li class="list-item" onclick="selectArticle(this, 'How do I update my payment method?', 'Guide to updating your billing and payment information.', 'https://cdn-icons-png.flaticon.com/512/2830/2830284.png', 'update-payment')">
+            <li class="list-item" data-tags="Other" onclick="selectArticle(this, 'How do I update my payment method?', 'Guide to updating your billing and payment information.', 'https://cdn-icons-png.flaticon.com/512/2830/2830284.png', 'update-payment')">
               How do I update my payment method?
             </li>
-          </ul>
-        </div>
-      </div>
+    </ul>
+  </div>
+</div>
 
     </div>
   </div>
 
-  <!-- External JavaScript na nagha-handle ng article selection logic -->
+  <!-- External JS for handling article switching and filtering -->
   <script src="/scripts/articles.js" defer></script>
 </BaseLayout>
+

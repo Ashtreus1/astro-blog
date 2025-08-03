@@ -536,3 +536,25 @@
 .p-2 {
   padding: 0.5rem;
 }
+
+.tag-btn {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  background-color: #f0f8ff;
+  border: 1px solid #aad4f5;
+  border-radius: 20px;
+  color: #003366;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.tag-btn:hover {
+  background-color: #d6f0ff;
+}
+
+.tag-btn.active {
+  background-color: #0077b6;
+  color: white;
+  border-color: #0077b6;
+}
+
