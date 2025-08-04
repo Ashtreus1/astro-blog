@@ -59,7 +59,7 @@ export default function AgentList() {
                 </button>*/}
                 <button
                   onClick={() =>
-                    (window.location.href = `/logs?agentId=${agent.id}`)
+                    (window.location.href = `/agents/logs?agentId=${agent.id}`)
                   }
                   className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
                 >

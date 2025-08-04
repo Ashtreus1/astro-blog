@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import MessageBox from '@/react-components/MessageBox';
 import OverdueTicketReport from '@/react-components/OverdueTicketReport';
+import FeedbackReport from '@/react-components/FeedbackReport';
 import { supabase } from '@/lib/supabaseClient';
 
 interface Ticket {
@@ -132,6 +133,13 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
           senderType="customer"
           priority={ticket.priority}
         />
+      )}
+
+      {status === 'resolved' && (
+          <FeedbackReport
+            ticketId={ticket.id}
+            customerId={ticket.customer_id}
+          />
       )}
 
       <OverdueTicketReport customerId={ticket.customer_id} />

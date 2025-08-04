@@ -13,6 +13,7 @@ interface Props {
   messages: any[];
   appendMessage: (message: any) => void;
   priority: 'Low' | 'Medium' | 'High';
+  disabled?: boolean;
 }
 
 export default function MessageBox({
@@ -21,6 +22,7 @@ export default function MessageBox({
   messages,
   appendMessage,
   priority,
+  disabled = false,
 }: Props) {
   const [msg, setMsg] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,36 +33,31 @@ export default function MessageBox({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const content = msg.trim();
-    if (!content) return;
+    if (disabled || !msg.trim()) return;
 
     const newMessage = {
       ticket_id: ticketId,
-      content,
+      content: msg,
       sender: senderType,
       created_at: new Date().toISOString(),
     };
 
-    // Optimistically append only if sender is customer
-    if (senderType === 'customer') {
-      appendMessage(newMessage);
-    }
-
+    appendMessage(newMessage); // Optimistic update
     setMsg('');
 
     const { error } = await supabase.from('messages').insert([newMessage]);
     if (error) {
-      console.error('Failed to send message:', error);
+      console.error('Failed to insert message:', error);
       return;
     }
 
-    // Bot reply for low-priority tickets
+    // Auto bot reply for low priority
     if (senderType === 'customer' && priority === 'Low') {
       try {
         const res = await fetch('/api/bot-reply', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ticketId, userMessage: content, priority }),
+          body: JSON.stringify({ ticketId, userMessage: msg, priority }),
         });
 
         if (res.ok) {
@@ -140,10 +137,11 @@ export default function MessageBox({
         <Input
           value={msg}
           onChange={(e) => setMsg(e.currentTarget.value)}
-          placeholder="Type your message..."
+          placeholder="Type message..."
           className="flex-1"
+          disabled={disabled}
         />
-        <Button type="submit">Send</Button>
+        <Button type="submit" disabled={disabled}>Send</Button>
       </form>
     </div>
   );

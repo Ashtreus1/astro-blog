@@ -6,6 +6,7 @@ import MessageBox from '@/react-components/MessageBox';
 import { supabase } from '@/lib/supabaseClient';
 import { useFetchTickets } from '@/hooks/useFetchTickets';
 import type { Ticket } from '@/hooks/useFetchTickets';
+import { Button } from '@/components/ui/button';
 
 export default function ChatPanel({ agentId }: { agentId: string }) {
   const tickets = useFetchTickets(agentId);
@@ -54,22 +55,45 @@ export default function ChatPanel({ agentId }: { agentId: string }) {
     };
   }, [selected]);
 
+  const handleResolve = async () => {
+    if (!selected) return;
+
+    const { error } = await supabase
+      .from('tickets')
+      .update({ status: 'resolved' })
+      .eq('id', selected.id);
+
+    if (!error) {
+      setSelected((prev) => prev && { ...prev, status: 'resolved' });
+    } else {
+      alert('Failed to resolve ticket');
+    }
+  };
+
   return (
     <div className="flex h-full">
       <TicketSidebar tickets={tickets} selected={selected} onSelect={setSelected} />
       <div className="flex-1 flex flex-col">
         {selected ? (
           <>
-            <div className="border-b p-4">
-              <h2 className="text-xl font-bold">{selected.name}</h2>
-              <p className="text-sm">{`${selected.issue} – ${selected.status}`}</p>
+            <div className="border-b p-4 flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold">{selected.name}</h2>
+                <p className="text-sm">{`${selected.issue} – ${selected.status}`}</p>
+              </div>
+              {selected.status !== 'resolved' && (
+                <Button onClick={handleResolve} variant="outline">
+                  Resolve
+                </Button>
+              )}
             </div>
             <MessageBox
               ticketId={selected.id}
               messages={messages}
-              appendMessage={() => {}}
+              appendMessage={(m) => setMessages((prev) => [...prev, m])}
               senderType="support"
               priority={selected.priority}
+              disabled={selected.status === 'resolved'}
             />
           </>
         ) : (
