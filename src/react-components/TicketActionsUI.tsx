@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import AssignTicketModal from '@/react-components/AssignTicketModal';
 import AgentHistory from '@/react-components/AgentHistory';
 import { ArrowDownToDot, MessagesSquare } from 'lucide-react';
 
@@ -27,7 +26,6 @@ export default function TicketActions() {
         </button>
       </div>
 
-      {showAssign && <AssignTicketModal onClose={() => setShowAssign(false)} />}
       {showHistory && <AgentHistory onClose={() => setShowHistory(false)} />}
     </>
   );

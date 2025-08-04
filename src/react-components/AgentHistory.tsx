@@ -19,18 +19,43 @@ export default function AgentHistory({
   }, [agentId]);
 
   async function fetchConversations(agentId: string) {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('id, ticket_id, sender, content, created_at')
-      .eq('sender', agentId)
-      .order('created_at', { ascending: false });
+    try {
+      // Step 1: Fetch ticket IDs assigned to this agent using agent_id
+      const { data: tickets, error: ticketsError } = await supabase
+        .from('tickets')
+        .select('id')
+        .eq('agent_id', agentId); // Filter by the agent_id from the tickets table
 
-    if (error) {
-      console.error('Error fetching messages:', error);
-    } else {
+      if (ticketsError) {
+        throw new Error(ticketsError.message);
+      }
+
+      if (!tickets || tickets.length === 0) {
+        setConversations([]); // No tickets assigned to this agent
+        setLoading(false);
+        return;
+      }
+
+      // Step 2: Get ticket_ids and fetch messages related to these ticket_ids
+      const ticketIds = tickets.map((ticket) => ticket.id);
+
+      // Fetch messages related to the ticket_ids
+      const { data, error } = await supabase
+        .from('messages')
+        .select('id, ticket_id, sender, content, created_at')
+        .in('ticket_id', ticketIds) // Fetch messages where ticket_id is in the list
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
       setConversations(data || []);
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (

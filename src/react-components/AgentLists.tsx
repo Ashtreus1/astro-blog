@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import AssignTicketModal from "@/react-components/AssignTicketModal";
-import { ArrowDownToDot, MessagesSquare } from "lucide-react";
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+import { MessagesSquare } from 'lucide-react';
 
 type Agent = {
   id: string;
@@ -12,7 +13,6 @@ type Agent = {
 export default function AgentList() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAssignModal, setShowAssignModal] = useState(false);
 
   useEffect(() => {
     fetchAgents();
@@ -21,12 +21,12 @@ export default function AgentList() {
   async function fetchAgents() {
     setLoading(true);
     const { data, error } = await supabase
-      .from("agents")
-      .select("*")
-      .eq("is_available", true);
+      .from('agents')
+      .select('*')
+      .eq('is_available', true);
 
     if (error) {
-      console.error("Error fetching agents:", error);
+      console.error('Error fetching agents:', error);
     } else {
       setAgents(data || []);
     }
@@ -50,29 +50,17 @@ export default function AgentList() {
               className="bg-white px-4 py-2 rounded shadow flex justify-between items-center"
             >
               <span>{agent.name}</span>
-              <div className="flex gap-2">
-                {/*<button
-                  onClick={() => setShowAssignModal(true)}
-                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                >
-                  <ArrowDownToDot className="w-5 h-5" />
-                </button>*/}
-                <button
-                  onClick={() =>
-                    (window.location.href = `/agents/logs?agentId=${agent.id}`)
-                  }
-                  className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                >
-                  <MessagesSquare className="w-5 h-5" />
-                </button>
-              </div>
+              <button
+                onClick={() =>
+                  (window.location.href = `/agents/logs?agentId=${agent.id}`)
+                }
+                className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 flex items-center gap-1"
+              >
+                <MessagesSquare className="w-5 h-5" />
+              </button>
             </div>
           ))}
         </div>
-      )}
-
-      {showAssignModal && (
-        <AssignTicketModal onClose={() => setShowAssignModal(false)} />
       )}
     </div>
   );
