@@ -1,84 +1,77 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 
-
 const pageTitle = "Blogs";
 ---
 
 <BaseLayout title={pageTitle}>
   <!-- Articles Section -->
   <div class="max-w-7xl mx-auto px-4 pt-[8.5rem] pb-10">
-    
-
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-  <!-- LEFT SECTION: Main Article Card -->
-<div class="h-[460px] flex flex-col">
-  <div
-    id="articleCard"
-    class="bg-[#CAF0F8] rounded-[14px] px-8 pt-10 pb-4 text-center shadow-sm transition duration-200 ease-in-out transform hover:-translate-y-[3px] hover:shadow-lg flex flex-col justify-between items-center cursor-pointer flex-1"
-    onclick="openFullArticle()"
-  >
-    <div class="flex flex-col items-center justify-center flex-grow">
-      <img
-        id="articleImg"
-        src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png"
-        alt="Password Reset"
-        class="max-w-[130px] mb-5"
-      />
-      <h6 id="articleTitle" class="text-[#003366] text-[1.35rem] font-semibold mb-2">
-        Password Reset
-      </h6>
-      <p
-        id="articleDesc"
-        class="text-[#555] text-[1.08rem] leading-[1.5] max-w-[95%] mx-auto min-h-[60px]"
-      >
-        This teaches you how to reset your password
-      </p>
-    </div>
+      <!-- LEFT SECTION: Main Article Card -->
+      <div class="h-[520px] flex flex-col">
+        <div
+          id="articleCard"
+          class="bg-[#CAF0F8] rounded-[14px] px-8 pt-10 pb-4 text-center shadow-sm transition duration-200 ease-in-out transform hover:-translate-y-[3px] hover:shadow-lg flex flex-col justify-between items-center cursor-pointer flex-1"
+          onclick="openFullArticle()"
+        >
+          <div class="flex flex-col items-center justify-center flex-grow">
+            <img
+              id="articleImg"
+              src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png"
+              alt="Password Reset"
+              class="max-w-[130px] mb-5"
+            />
+            <h6 id="articleTitle" class="text-[#003366] text-[1.35rem] font-semibold mb-2">
+              Password Reset
+            </h6>
+            <p
+              id="articleDesc"
+              class="text-[#555] text-[1.08rem] leading-[1.5] max-w-[95%] mx-auto min-h-[60px]"
+            >
+              This teaches you how to reset your password
+            </p>
+          </div>
 
-    <!-- Buttons at bottom of the card -->
-    <div class="flex gap-4 justify-center mt-6">
-      <button
-        onclick="event.stopPropagation(); showPrevArticle()"
-        class="w-32 h-10 bg-[#0077B6] text-white rounded-md text-sm font-medium hover:bg-[#023E8A] transition"
-      >
-        ⬅ Previous
-      </button>
-      <button
-        onclick="event.stopPropagation(); showNextArticle()"
-        class="w-32 h-10 bg-[#0077B6] text-white rounded-md text-sm font-medium hover:bg-[#023E8A] transition"
-      >
-        Next ➡
-      </button>
-    </div>
-  </div>
-</div>
+          <!-- Buttons at bottom of the card -->
+          <div class="flex gap-4 justify-center mt-6">
+            <button
+              onclick="event.stopPropagation(); showPrevArticle()"
+              class="w-32 h-10 bg-[#0077B6] text-white rounded-md text-sm font-medium hover:bg-[#023E8A] transition"
+            >
+               Previous
+            </button>
+            <button
+              onclick="event.stopPropagation(); showNextArticle()"
+              class="w-32 h-10 bg-[#0077B6] text-white rounded-md text-sm font-medium hover:bg-[#023E8A] transition"
+            >
+              Next 
+            </button>
+          </div>
+        </div>
+      </div>
 
+      <!-- RIGHT SECTION: Search + Scrollable Article List -->
+      <div class="h-[520px] flex flex-col">
+        <!-- Search Bar -->
+        <div class="mb-3">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="🔍 Search..."
+            onkeyup="filterArticles()"
+            class="w-full px-3 py-[0.4rem] text-xs rounded-[8px] border border-gray-300 bg-[#F0F8FF] text-gray-700 placeholder-gray-500 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-blue-300 transition"
+          />
+        </div>
 
-
-<!-- RIGHT SECTION: Search + Scrollable Article List -->
-<div class="h-[460px] flex flex-col">
-  <!-- Search Bar -->
-  <div class="mb-3">
-    <input
-      type="text"
-      id="searchInput"
-      placeholder="🔍 Search..."
-      onkeyup="filterArticles()"
-      class="w-full px-3 py-[0.4rem] text-xs rounded-[8px] border border-gray-300 bg-[#F0F8FF] text-gray-700 placeholder-gray-500 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-blue-300 transition"
-    />
-
-
-  </div>
-
-  <!-- TAG FILTERS -->
-<div class="flex flex-wrap gap-2 mb-4">
-  <button class="tag-btn active px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="All" onclick="filterByTag('All')">All</button>
-  <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Tickets" onclick="filterByTag('Tickets')">Tickets</button>
-  <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Account" onclick="filterByTag('Account')">Account</button>
-  <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Other" onclick="filterByTag('Other')">Other</button>
-</div>
+        <!-- TAG FILTERS -->
+        <div class="flex flex-wrap gap-2 mb-4">
+          <button class="tag-btn active px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="All" onclick="filterByTag('All')">All</button>
+          <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Tickets" onclick="filterByTag('Tickets')">Tickets</button>
+          <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Account" onclick="filterByTag('Account')">Account</button>
+          <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Other" onclick="filterByTag('Other')">Other</button>
+        </div>
 
 
   <!-- Scrollable List -->
@@ -123,5 +116,20 @@ const pageTitle = "Blogs";
 
   <!-- External JS for handling article switching and filtering -->
   <script src="/scripts/articles.js" defer></script>
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const defaultItem = document.querySelector("#articleList li[data-tags='Account']");
+    if (defaultItem) {
+      defaultItem.classList.add('active');
+      selectArticle(
+        defaultItem,
+        'Password Reset',
+        'This teaches you on how to reset your password',
+        'https://cdn-icons-png.flaticon.com/512/3064/3064197.png',
+        'password-reset'
+      );
+    }
+  });
+</script>
 </BaseLayout>
 
