@@ -1,5 +1,5 @@
 ---
-import AgentLogs from '@/react-components/AgentLogs.tsx'; // adjust path
+import AgentLogs from '@/react-components/AgentLogs.tsx';
 import { supabase } from '@/lib/supabaseClient';
 
 const url = new URL(Astro.request.url);
@@ -11,23 +11,26 @@ let agentName = '';
 if (agentId) {
   const { data: tickets, error: ticketErr } = await supabase
     .from('tickets')
-    .select('id, customer:customer_id(name), status, created_at')
+    .select('id, status, issue, customer:customer_id(name)')
     .eq('agent_id', agentId);
 
-  const ticketIds = tickets?.map((t) => t.id) || [];
+  if (!ticketErr && tickets?.length > 0) {
+    const ticketIds = tickets.map(t => t.id);
 
-  const { data: messages, error: msgError } = await supabase
-    .from('messages')
-    .select('id, ticket_id, sender, content, created_at')
-    .in('ticket_id', ticketIds)
-    .order('created_at', { ascending: true });
+    const { data: messages, error: msgError } = await supabase
+      .from('messages')
+      .select('id, ticket_id, sender, content, created_at')
+      .in('ticket_id', ticketIds)
+      .order('created_at', { ascending: true });
 
-  const grouped = ticketIds.map((id) => ({
-    ticket: tickets.find((t) => t.id === id),
-    messages: messages?.filter((m) => m.ticket_id === id) || [],
-  }));
-
-  groupedMessages = grouped;
+    groupedMessages = tickets.map(ticket => ({
+      ticketId: ticket.id,
+      customerName: ticket.customer?.name || 'Unknown',
+      issue: ticket.issue,
+      status: ticket.status,
+      messages: (messages || []).filter(msg => msg.ticket_id === ticket.id)
+    }));
+  }
 
   const { data: agent, error: agentErr } = await supabase
     .from('agents')
@@ -44,6 +47,11 @@ if (agentId) {
     <title>Agent Logs</title>
   </head>
   <body>
-    <AgentLogs agentName={agentName} agentId={agentId} groupedMessages={groupedMessages} client:only="react" />
+    <AgentLogs
+      agentName={agentName}
+      agentId={agentId}
+      groupedMessages={groupedMessages}
+      client:only="react"
+    />
   </body>
 </html>
