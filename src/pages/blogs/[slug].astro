@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import FeedbackForm from '@/react-components/FeedbackForm';
 
 export async function getStaticPaths() {
   const articles = await getCollection('articles');
@@ -36,24 +37,6 @@ const { title, pubDate, author } = article.data;
       <Content />
     </div>
   </article>
+    <FeedbackForm client:load />
 
-  <section class="bg-gray-50 max-w-xl mx-auto mt-16 p-6 rounded-xl shadow-sm">
-    <h5 class="text-lg font-semibold text-gray-800 mb-3 text-center">
-      Was this article helpful?
-    </h5>
-    <textarea 
-      class="w-full resize-none rounded-md border border-gray-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 mb-3" 
-      rows="4" 
-      placeholder="Leave your feedback here...">
-    </textarea>
-    <div class="text-center">
-      <button 
-        onclick="submitFeedback()"
-        class="bg-[#014F86] hover:bg-[#013f6c] text-white text-sm font-medium py-2 px-6 rounded-md transition-colors">
-        Submit
-      </button>
-    </div>
-  </section>
-
-  <script type="module" src="/scripts/feedback.js"></script>
 </BaseLayout>
