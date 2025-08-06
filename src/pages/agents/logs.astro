@@ -1,0 +1,85 @@
+---
+import AgentLogs from '@/react-components/AgentLogs.tsx';
+import { supabase } from '@/lib/supabaseClient';
+import '@/styles/global.css';
+
+const url = new URL(Astro.request.url);
+const agentId = url.searchParams.get('agentId');
+
+let groupedMessages = [];
+let agentName = '';
+
+if (agentId) {
+  // ✅ Fetch agent name
+  const { data: agent, error: agentErr } = await supabase
+    .from('agents')
+    .select('name')
+    .eq('id', agentId)
+    .single();
+
+  if (agentErr) {
+    console.error('Error fetching agent:', agentErr);
+  } else {
+    agentName = agent?.name || '';
+  }
+
+  // ✅ Fetch tickets for this agent
+  const { data: tickets, error: ticketErr } = await supabase
+    .from('tickets')
+    .select('id, status, issue, customer:customer_id(name)')
+    .eq('agent_id', agentId);
+
+  if (ticketErr) {
+    console.error('Error fetching tickets:', ticketErr);
+  } else if (tickets?.length > 0) {
+    const ticketIds = tickets.map(t => t.id);
+
+    // ✅ Fetch messages for all tickets
+    const { data: messages, error: msgError } = await supabase
+      .from('messages')
+      .select('id, ticket_id, sender, content, created_at')
+      .in('ticket_id', ticketIds)
+      .order('created_at', { ascending: true });
+
+    if (msgError) {
+      console.error('Error fetching messages:', msgError);
+    }
+
+    // ✅ Group tickets with their messages & extract creation date
+    groupedMessages = tickets.map(ticket => {
+      const ticketMessages = (messages || []).filter(msg => msg.ticket_id === ticket.id);
+      const createdAt = ticketMessages.length > 0 ? ticketMessages[0].created_at : null;
+
+      return {
+        ticketId: ticket.id,
+        customerName: ticket.customer?.name || 'Unknown',
+        issue: ticket.issue,
+        status: ticket.status,
+        createdAt,
+        messages: ticketMessages
+      };
+    });
+
+    // ✅ Sort tickets by creation date (newest first)
+    groupedMessages.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA; // Newest first
+    });
+  }
+}
+---
+
+<html>
+  <head>
+    <title>Agent Logs</title>
+  </head>
+  <body>
+    <AgentLogs
+      agentName={agentName}
+      agentId={agentId}
+      groupedMessages={groupedMessages}
+      client:only="react"
+    />
+  </body>
+</html>

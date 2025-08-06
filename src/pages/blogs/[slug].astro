@@ -1,0 +1,42 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import FeedbackForm from '@/react-components/FeedbackForm';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles');
+  return articles.map(article => ({
+    params: { slug: article.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+const articles = await getCollection('articles');
+const article = articles.find(article => article.slug === slug);
+
+if (!article) {
+  throw new Error(`Article not found for slug: ${slug}`);
+}
+
+const { Content } = await article.render();
+const { title, pubDate, author } = article.data;
+---
+
+<BaseLayout title={title}>
+  <article class="max-w-3xl mx-auto px-4 pt-[96px] pb-16 poppins-light text-[#1c1c1c] leading-relaxed">
+
+    <h1 class="text-4xl md:text-5xl font-bold mb-6">
+      {title}
+    </h1>
+
+    <p class="text-sm text-gray-500 mb-10 border-b pb-4">
+      Published on {pubDate} · {author}
+    </p>
+
+    <div class="custom-markdown">
+      <Content />
+    </div>
+  </article>
+    <FeedbackForm client:load />
+
+</BaseLayout>

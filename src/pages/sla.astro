@@ -1,0 +1,69 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const pageTitle = "SLA Policy";
+---
+
+<BaseLayout title={pageTitle}>
+  <section class="max-w-4xl mx-auto px-6 pt-[96px] pb-12">
+
+    <h1 class="text-4xl font-bold mb-6" style="color: #48CAE4;">Service Level Agreement (SLA)</h1>
+
+    <p class="text-gray-700 mb-6 text-lg leading-relaxed">
+      This Service Level Agreement (SLA) outlines the expected timelines and escalation procedures for resolving various types of support tickets. It aims to ensure that all tickets are handled in a timely and efficient manner based on their priority level. The SLA defines different categories of support requests, each with specified response and resolution times, as well as escalation rules to guarantee that unresolved issues are promptly addressed by the appropriate team.
+    </p>
+
+    <div class="space-y-10">
+      <div>
+        <h2 class="text-2xl font-semibold mb-2 text-red-600">High Priority</h2>
+        <p class="text-gray-700 mb-2"><strong>Examples:</strong> Account lockouts, billing issues, etc.</p>
+        <p class="text-gray-700 mb-2"><strong>Response Time:</strong> Within <span class="font-semibold text-blue-600">30 minutes to 1 hour</span></p>
+        <p class="text-gray-700 mb-2"><strong>Resolution Time:</strong> Within <span class="font-semibold text-blue-600">the same period</span></p>
+        <p class="text-gray-700 mb-2"><strong>Escalation:</strong> If unresolved, issues are immediately escalated to an admin team member for swift action.</p>
+        <p class="text-gray-700"><strong>Direct to:</strong> Admin Team</p>
+      </div>
+
+      <div>
+        <h2 class="text-2xl font-semibold mb-2 text-orange-500">Urgent</h2>
+        <p class="text-gray-700 mb-2"><strong>Examples:</strong> Unauthorized access alerts, threats of violence, etc.</p>
+        <p class="text-gray-700 mb-2"><strong>Response Time:</strong> Immediate attention required</p>
+        <p class="text-gray-700 mb-2"><strong>Resolution Time:</strong> Immediate action required</p>
+        <p class="text-gray-700 mb-2"><strong>Escalation:</strong> Directly escalated to the relevant security or legal teams without delay.</p>
+        <p class="text-gray-700"><strong>Direct to:</strong> Security/Legal Team</p>
+      </div>
+
+      <div>
+        <h2 class="text-2xl font-semibold mb-2 text-blue-500">Medium Priority</h2>
+        <p class="text-gray-700 mb-2"><strong>Examples:</strong> Product delivery issues, refund requests, etc.</p>
+        <p class="text-gray-700 mb-2"><strong>Response Time:</strong> 4 hours to 1 business day</p>
+        <p class="text-gray-700 mb-2"><strong>Resolution Time:</strong> 1 to 3 business days</p>
+        <p class="text-gray-700 mb-2"><strong>Escalation:</strong> If unresolved within the specified timeframes, the issue is escalated to the admin team.</p>
+        <p class="text-gray-700"><strong>Direct to:</strong> Support Bot (Initial handling), escalated to Admin Team if needed</p>
+      </div>
+
+      <div>
+        <h2 class="text-2xl font-semibold mb-2 text-green-600">Low Priority</h2>
+        <p class="text-gray-700 mb-2"><strong>Examples:</strong> UI/UX bugs, general feedback, etc.</p>
+        <p class="text-gray-700 mb-2"><strong>Response Time:</strong> Within 1 business day</p>
+        <p class="text-gray-700 mb-2"><strong>Resolution Time:</strong> Within 7 business days</p>
+        <p class="text-gray-700 mb-2"><strong>Escalation:</strong> Minimal escalation unless flagged as critical.</p>
+        <p class="text-gray-700"><strong>Direct to:</strong> Support Bot for initial handling, further escalation only if critical</p>
+      </div>
+
+      <div>
+        <h2 class="text-2xl font-semibold mb-2" style="color: #48CAE4;">Escalation Process</h2>
+        <p class="text-gray-700 mb-4">
+          To ensure a smooth and efficient resolution process:
+        </p>
+        <ul class="list-disc pl-6 text-gray-700 space-y-2">
+          <li><strong>Low & Medium Priority:</strong> Handled initially by the support bot to streamline processing. If the issue exceeds the expected resolution timeframe, it will be escalated to the admin team for further attention.</li>
+          <li><strong>High & Urgent Priority:</strong> Automatically directed to the relevant team (Admin, Security, or Legal), ensuring immediate handling by qualified personnel.</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="text-gray-700 mt-10">
+      This structured approach ensures that customers receive the appropriate level of service based on the urgency and impact of their issues. Unresolved matters are escalated in a timely manner to maintain service standards and operational efficiency.
+    </p>
+  </section>
+</BaseLayout>

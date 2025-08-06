@@ -1,0 +1,31 @@
+---
+import RequestTicketModal from '@/react-components/RequestTicketModal';
+---
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-transform duration-300 transform translate-y-0 flex justify-between items-center w-full p-5">
+	<a href="/" class="ml-10 text-3xl font-semibold text-gray-800">ChatDesk</a>
+	<div class="flex justify-between items-center gap-5 mr-10">
+		<a href="/blogs/" class="hover:underline transition duration-300">Blog</a>
+		<RequestTicketModal client:load/>
+	</div>
+	<script>
+  let lastScrollY = window.scrollY;
+  const navbar = document.getElementById('navbar');
+
+  window.addEventListener('scroll', () => {
+    const currentScrollY = window.scrollY;
+
+    if (currentScrollY > lastScrollY && currentScrollY > 50) {
+      // Scrolling down → hide navbar
+      navbar.classList.remove('translate-y-0');
+      navbar.classList.add('-translate-y-full');
+    } else {
+      // Scrolling up → show navbar
+      navbar.classList.remove('-translate-y-full');
+      navbar.classList.add('translate-y-0');
+    }
+
+    lastScrollY = currentScrollY;
+  });
+</script>
+
+</nav>

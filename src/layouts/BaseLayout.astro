@@ -1,0 +1,61 @@
+---
+/*
+  Ito naman ang file ng BaseLayout component, na ginagamit natin bilang layout wrapper
+  para sa mga pages tulad ng Home Page.
+
+  Sa Astro, pwedeng gumawa ng layout component na reusable — ibig sabihin, 
+  imbes na ulit-ulitin ang HTML structure gaya ng `<head>`, `<body>`, navigation bar, etc.,
+  gagawa tayo ng *layout component* at doon natin ilalagay ang mga common structure na ito.
+
+  Purpose ng layout na ‘to ay magkaroon ng **iisang consistent layout structure** 
+  sa buong application — gaya ng shared navigation bar sa taas at consistent styling 
+  sa buong page.
+
+  Sa case na ‘to, ginagamit natin si `<slot />` para ipasok ang content ng bawat 
+  individual page sa loob ng layout na ‘to.
+
+  ➤ Ang pangalan ng layout na 'to ay **BaseLayout**, at makikita ito sa:
+     `src/layouts/BaseLayout.astro`
+
+  ➤ Sa usage side, ito ang tawag:
+     ```astro
+     <BaseLayout title="Home">
+       <!-- Page content here -->
+     </BaseLayout>
+     ```
+
+  ➤ Ang `title` prop ay ginagamit natin para i-dynamically baguhin 
+     ang laman ng `<title>` tag ng bawat page.
+
+  ➤ Kasama rin dito ang pag-import ng global styling (`global.css`) 
+     para maging consistent ang design sa buong app.
+
+  ➤ Gumagamit rin tayo ng Navigation component na makikita sa:
+     `src/components/Navigation.astro`
+*/
+
+	// Global CSS Styles na ginagamit sa buong website
+	import "@/styles/global.css";
+
+	// Navigation bar component na common sa lahat ng pages
+	import Navigation from '@/components/Navigation.astro';
+
+	// Dynamic title page
+	const { title } = Astro.props;
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<Navigation />
+
+		<!-- Dito pumapasok ang content ng page na gumagamit ng layout na ito -->
+		<slot/>
+	</body>
+</html>
