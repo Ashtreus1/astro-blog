@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import type { FC } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 interface Message {
   id: string;
@@ -36,11 +37,54 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const AgentLogs: FC<AgentLogsProps> = ({ agentName, groupedMessages }) => {
+const AgentLogs: FC<AgentLogsProps> = ({ agentName, groupedMessages: initialMessages }) => {
   const [openTicketId, setOpenTicketId] = useState<string | null>(null);
+  const [tickets, setTickets] = useState(initialMessages);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const toggleConversation = (ticketId: string) => {
     setOpenTicketId(prev => (prev === ticketId ? null : ticketId));
+  };
+
+  const deleteConversation = async (ticketId: string) => {
+    if (!confirm('Are you sure you want to delete this conversation?')) return;
+
+    setDeleting(ticketId);
+
+    try {
+      // 1️⃣ Delete reports for the ticket
+      const { error: reportsErr } = await supabase
+        .from('reports')
+        .delete()
+        .eq('ticket_id', ticketId);
+
+      if (reportsErr) throw reportsErr;
+
+      // 2️⃣ Delete messages for the ticket
+      const { error: messagesErr } = await supabase
+        .from('messages')
+        .delete()
+        .eq('ticket_id', ticketId);
+
+      if (messagesErr) throw messagesErr;
+
+      // 3️⃣ Delete the ticket itself
+      const { error: ticketsErr } = await supabase
+        .from('tickets')
+        .delete()
+        .eq('id', ticketId);
+
+      if (ticketsErr) throw ticketsErr;
+
+      // ✅ Update UI
+      setTickets(prev => prev.filter(ticket => ticket.ticketId !== ticketId));
+      if (openTicketId === ticketId) setOpenTicketId(null);
+    } catch (error) {
+      console.error('Error deleting ticket:', error);
+      alert('Failed to delete the conversation.');
+    } finally {
+      setDeleting(null);
+    }
   };
 
   return (
@@ -49,21 +93,19 @@ const AgentLogs: FC<AgentLogsProps> = ({ agentName, groupedMessages }) => {
         Activity Log – <span className="italic text-3xl">{agentName}</span>
       </h1>
 
-      {groupedMessages.length === 0 ? (
+      {tickets.length === 0 ? (
         <p className="italic text-gray-400">No tickets or messages found for this agent.</p>
       ) : (
         <div className="border rounded-xl overflow-hidden shadow">
           <div className="divide-y divide-gray-300">
-            {groupedMessages.map((ticket, index) => {
+            {tickets.map((ticket, index) => {
               const statusColor = getStatusColor(ticket.status);
               const isOpen = openTicketId === ticket.ticketId;
 
               return (
                 <div
                   key={ticket.ticketId}
-                  className={`${
-                    index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
-                  } hover:bg-gray-100 transition-colors`}
+                  className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100 transition-colors`}
                 >
                   {/* Ticket Header Row */}
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-8 py-6">
@@ -71,31 +113,37 @@ const AgentLogs: FC<AgentLogsProps> = ({ agentName, groupedMessages }) => {
                       <span>
                         <strong>Customer Name:</strong> {ticket.customerName}
                       </span>
-
                       <span>
                         <strong>Status:</strong>{' '}
                         <span className={`${statusColor}`}>{ticket.status}</span>
                       </span>
-
                       <span>
                         <strong>Date Submitted:</strong>{' '}
                         {ticket.createdAt
                           ? new Date(ticket.createdAt).toLocaleDateString()
                           : 'Unknown'}
                       </span>
-
                       <span>
                         <strong>Ticket Issue:</strong>{' '}
                         <span className="text-red-500 font-semibold">{ticket.issue}</span>
                       </span>
                     </div>
 
-                    <button
-                      onClick={() => toggleConversation(ticket.ticketId)}
-                      className="text-green-600 font-semibold hover:underline"
-                    >
-                      {isOpen ? 'Hide Conversation' : 'View Full Conversation'}
-                    </button>
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => toggleConversation(ticket.ticketId)}
+                        className="text-green-600 font-semibold hover:underline"
+                      >
+                        {isOpen ? 'Hide Conversation' : 'View Full Conversation'}
+                      </button>
+                      <button
+                        onClick={() => deleteConversation(ticket.ticketId)}
+                        disabled={deleting === ticket.ticketId}
+                        className="text-red-600 font-semibold hover:underline disabled:opacity-50"
+                      >
+                        {deleting === ticket.ticketId ? 'Deleting...' : 'Delete Conversation'}
+                      </button>
+                    </div>
                   </div>
 
                   {/* Conversation Dropdown */}
