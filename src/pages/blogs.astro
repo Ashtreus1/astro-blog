@@ -19,20 +19,21 @@ const pageTitle = "Blogs";
           <div class="flex flex-col items-center justify-center flex-grow">
             <img
               id="articleImg"
-              src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png"
-              alt="Password Reset"
+              src="https://cdn-icons-png.flaticon.com/512/3103/3103446.png"
+              alt="Battery Draining Fast"
               class="max-w-[130px] mb-5"
             />
             <h6 id="articleTitle" class="text-[#003366] text-[1.35rem] font-semibold mb-2">
-              Password Reset
+              Battery Draining Fast
             </h6>
             <p
               id="articleDesc"
               class="text-[#555] text-[1.08rem] leading-[1.5] max-w-[95%] mx-auto min-h-[60px]"
             >
-              This teaches you how to reset your password
+              Common causes and solutions for excessive battery drain on devices.
             </p>
           </div>
+
 
           <!-- Buttons at bottom of the card -->
           <div class="flex gap-4 justify-center mt-6">
@@ -63,50 +64,62 @@ const pageTitle = "Blogs";
             onkeyup="filterArticles()"
             class="w-full px-3 py-[0.4rem] text-xs rounded-[8px] border border-gray-300 bg-[#F0F8FF] text-gray-700 placeholder-gray-500 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-blue-300 transition"
           />
-        </div>
+        </div>  
 
         <!-- TAG FILTERS -->
         <div class="flex flex-wrap gap-2 mb-4">
           <button class="tag-btn active px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="All" onclick="filterByTag('All')">All</button>
-          <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Tickets" onclick="filterByTag('Tickets')">Tickets</button>
-          <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Account" onclick="filterByTag('Account')">Account</button>
-          <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Other" onclick="filterByTag('Other')">Other</button>
+          <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Power & Battery" onclick="filterByTag('Power & Battery')">Power & Battery</button>
+          <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Hardware & Display" onclick="filterByTag('Hardware & Display')">Hardware & Display</button>
+          <button class="tag-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition" data-tag="Performance & Connectivity" onclick="filterByTag('Performance & Connectivity')">Performance & Connectivity</button>
         </div>
 
 
   <!-- Scrollable List -->
   <div class="flex-1 overflow-y-auto rounded-[10px] border border-gray-200 shadow-sm p-3">
     <ul id="articleList" class="space-y-2">
-      <li class="list-item active" data-tags="Account" onclick="selectArticle(this, 'Password Reset', 'This teaches you on how to reset your password', 'https://cdn-icons-png.flaticon.com/512/3064/3064197.png', 'password-reset')">
-              Password Reset
-            </li>
-            <li class="list-item" data-tags="Tickets" onclick="selectArticle(this, 'Where can I view my ticket history?', 'Steps to access and view all your past support tickets.', 'https://cdn-icons-png.flaticon.com/512/1828/1828961.png', 'ticket-history')">
-              Where can I view my ticket history?
-            </li>
-            <li class="list-item" data-tags="Tickets" onclick="selectArticle(this, 'What information should I include in my support ticket?', 'Best practices for writing a complete and effective support ticket.', 'https://cdn-icons-png.flaticon.com/512/709/709496.png', 'ticket-information')">
-              What information should I include in my support ticket?
-            </li>
-            <li class="list-item" data-tags="Other" onclick="selectArticle(this, 'Issues that affect usability but don’t block core functions.', 'Learn what issues impact usability and how to address them.', 'https://cdn-icons-png.flaticon.com/512/565/565491.png', 'usability-issues')">
-              Issues that affect usability but don’t block core functions.
-            </li>
-            <li class="list-item" data-tags="Tickets" onclick="selectArticle(this, 'How do I submit a ticket?', 'Step-by-step guide on submitting a new support ticket.', 'https://cdn-icons-png.flaticon.com/512/190/190411.png', 'submit-ticket')">
-              How do I submit a ticket?
-            </li>
-            <li class="list-item" data-tags="Tickets" onclick="selectArticle(this, 'Can I update or edit my ticket after submitting it?', 'Learn how to update or add more details to a submitted ticket.', 'https://cdn-icons-png.flaticon.com/512/1250/1250615.png', 'edit-ticket')">
-              Can I update or edit my ticket after submitting it?
-            </li>
-            <li class="list-item" data-tags="Tickets" onclick="selectArticle(this, 'How do I track the status of my ticket?', 'Ways to monitor the progress and status of your active support tickets.', 'https://cdn-icons-png.flaticon.com/512/709/709690.png', 'track-ticket')">
-              How do I track the status of my ticket?
-            </li>
-            <li class="list-item" data-tags="Other" onclick="selectArticle(this, 'How long does it take to receive a response?', 'Typical response times for submitted tickets.', 'https://cdn-icons-png.flaticon.com/512/992/992651.png', 'response-time')">
-              How long does it take to receive a response?
-            </li>
-            <li class="list-item" data-tags="Other" onclick="selectArticle(this, 'Where can I view my invoices?', 'Learn where to locate and download all your past invoices.', 'https://cdn-icons-png.flaticon.com/512/3135/3135679.png', 'view-invoices')">
-              Where can I view my invoices?
-            </li>
-            <li class="list-item" data-tags="Other" onclick="selectArticle(this, 'How do I update my payment method?', 'Guide to updating your billing and payment information.', 'https://cdn-icons-png.flaticon.com/512/2830/2830284.png', 'update-payment')">
-              How do I update my payment method?
-            </li>
+      <li class="list-item" data-tags="Power & Battery" onclick="selectArticle(this, 'Battery Draining Fast', 'Common causes and solutions for excessive battery drain on devices.', 'https://cdn-icons-png.flaticon.com/512/3103/3103476.png', 'battery-drainingfast')">
+    Battery Draining Fast
+  </li>
+
+  <li class="list-item" data-tags="Hardware & Display" onclick="selectArticle(this, 'Screen Flickering', 'Understanding why screens flicker and how to fix it.', 'https://cdn-icons-png.flaticon.com/512/5826/5826138.png', 'screen-flickering')">
+    Screen Flickering
+  </li>
+
+  <li class="list-item" data-tags="Power & Battery" onclick="selectArticle(this, 'Overheating Device', 'Why devices overheat and steps to keep them cool.', 'https://cdn-icons-png.flaticon.com/512/3515/3515498.png', 'overheating-device')">
+    Overheating Device
+  </li>
+
+  <li class="list-item" data-tags="Performance & Connectivity" onclick="selectArticle(this, 'Slow Performance', 'Causes of sluggish device performance and how to improve speed.', 'https://cdn-icons-png.flaticon.com/512/648/648221.png', 'slow-performance')">
+    Slow Performance
+  </li>
+
+  <li class="list-item" data-tags="Performance & Connectivity" onclick="selectArticle(this, 'Bluetooth Not Connecting', 'Troubleshooting Bluetooth pairing and connection issues.', 'https://cdn-icons-png.flaticon.com/512/733/733585.png', 'bluetooth-not-connecting')">
+    Bluetooth Not Connecting
+  </li>
+
+  <li class="list-item" data-tags="Power & Battery" onclick="selectArticle(this, 'Charging Problem', 'Identifying and fixing charging issues with electronic devices.', 'https://cdn-icons-png.flaticon.com/512/3031/3031727.png', 'charging-problem')">
+    Charging Problem
+  </li>
+
+  <li class="list-item" data-tags="Hardware & Display" onclick="selectArticle(this, 'Speaker Distortion', 'Reasons for distorted sound and how to restore clarity.', 'https://cdn-icons-png.flaticon.com/512/3669/3669967.png', 'speaker-distortion')">
+    Speaker Distortion
+  </li>
+
+  <li class="list-item" data-tags="Performance & Connectivity" onclick="selectArticle(this, 'Wi-Fi Disconnection', 'Why devices keep losing Wi-Fi connection and how to stabilize it.', 'https://cdn-icons-png.flaticon.com/512/483/483947.png', 'wifi-disconnection')">
+    Wi-Fi Disconnection
+  </li>
+
+  <li class="list-item" data-tags="Hardware & Display" onclick="selectArticle(this, 'Touchscreen Unresponsive', 'Causes of unresponsive touchscreens and quick fixes.', 'https://cdn-icons-png.flaticon.com/512/2920/2920224.png', 'touchscreen-unresponsive')">
+    Touchscreen Unresponsive
+  </li>
+
+  <li class="list-item" data-tags="Hardware & Display" onclick="selectArticle(this, 'Camera Not Working', 'Fixing camera malfunctions and identifying possible causes.', 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png', 'camera-notworking')">
+    Camera Not Working
+  </li>
+
+      </li>
+
     </ul>
   </div>
 </div>
@@ -118,15 +131,17 @@ const pageTitle = "Blogs";
   <script src="/scripts/articles.js" defer></script>
   <script>
   window.addEventListener('DOMContentLoaded', () => {
-    const defaultItem = document.querySelector("#articleList li[data-tags='Account']");
+    // Find the first article in the list (Battery Draining Fast)
+    const defaultItem = document.querySelector("#articleList li");
+
     if (defaultItem) {
       defaultItem.classList.add('active');
       selectArticle(
         defaultItem,
-        'Password Reset',
-        'This teaches you on how to reset your password',
-        'https://cdn-icons-png.flaticon.com/512/3064/3064197.png',
-        'password-reset'
+        'Battery Draining Fast',
+        'Common causes and solutions for excessive battery drain on devices.',
+        'https://cdn-icons-png.flaticon.com/512/3103/3103446.png',
+        'battery-drainingfast'
       );
     }
   });
