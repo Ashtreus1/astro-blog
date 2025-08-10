@@ -11,9 +11,9 @@ const FAQ = () => (
   <div className="faq-card p-2 border rounded mt-1 overflow-auto max-h-20 text-sm">
     <h5 className="italic text-sm mb-2 text-gray-700">Frequently Asked Questions:</h5>
     <ul className="list-disc pl-4">
-      <li><a href="/blogs/password-reset" className="text-blue-700">How do I submit a ticket?</a></li>
-      <li><a href="/blogs/response-time" className="text-blue-700">How long does it take to get a response?</a></li>
-      <li><a href="/blogs/track-ticket" className="text-blue-700">How do I track my ticket?</a></li>
+      <li><a href="/blogs/battery-drainingfast" className="text-blue-700">Why is my battery draining fast?</a></li>
+      <li><a href="/blogs/screen-flickering" className="text-blue-700">How to fix screen flicker?</a></li>
+      <li><a href="/blogs/overheating-device" className="text-blue-700">Why is my device overheating?</a></li>
     </ul>
   </div>
 );

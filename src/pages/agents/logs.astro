@@ -23,10 +23,17 @@ if (agentId) {
     agentName = agent?.name || '';
   }
 
-  // ✅ Fetch tickets for this agent
+  // ✅ Fetch tickets for this agent (with created_at)
   const { data: tickets, error: ticketErr } = await supabase
     .from('tickets')
-    .select('id, status, issue, customer:customer_id(name)')
+    .select(`
+      id,
+      status,
+      issue,
+      created_at,
+      customer_id,
+      customer:customer_id(name)
+    `)
     .eq('agent_id', agentId);
 
   if (ticketErr) {
@@ -45,26 +52,23 @@ if (agentId) {
       console.error('Error fetching messages:', msgError);
     }
 
-    // ✅ Group tickets with their messages & extract creation date
-    groupedMessages = tickets.map(ticket => {
-      const ticketMessages = (messages || []).filter(msg => msg.ticket_id === ticket.id);
-      const createdAt = ticketMessages.length > 0 ? ticketMessages[0].created_at : null;
-
-      return {
-        ticketId: ticket.id,
-        customerName: ticket.customer?.name || 'Unknown',
-        issue: ticket.issue,
-        status: ticket.status,
-        createdAt,
-        messages: ticketMessages
-      };
-    });
+    // ✅ Group tickets with their messages
+    groupedMessages = tickets.map(ticket => ({
+      ticketId: ticket.id,
+      customerName: ticket.customer?.name ? String(ticket.customer.name) : 'Unknown',
+      issue: ticket.issue,
+      status: ticket.status,
+      createdAt: ticket.created_at, // now using ticket's own created_at
+      messages: (messages || [])
+        .filter(msg => msg.ticket_id === ticket.id)
+        .map(m => ({ ...m })) // clone to avoid reference leaks
+    }));
 
     // ✅ Sort tickets by creation date (newest first)
     groupedMessages.sort((a, b) => {
       const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return dateB - dateA; // Newest first
+      return dateB - dateA;
     });
   }
 }
