@@ -16,7 +16,7 @@ export default function AdminPanel() {
           <div className="space-x-2">
             <button
               onClick={() => setShowPending((prev) => !prev)}
-              className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+              className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 "
             >
               Pending Tickets
             </button>
@@ -29,7 +29,11 @@ export default function AdminPanel() {
           </div>
         </div>
 
-        {showPending && <SlaTicketList />}
+        {showPending && (
+          <div className="max-h-60 overflow-y-auto custom-scrollbar">
+            <SlaTicketList />
+          </div>
+        )}
         <TicketStats />
         {/*<ResponseCharts />*/}
       </div>
