@@ -42,6 +42,9 @@ const AgentLogs: FC<AgentLogsProps> = ({ agentName, groupedMessages: initialMess
   const [tickets, setTickets] = useState(initialMessages);
   const [deleting, setDeleting] = useState<string | null>(null);
 
+  // NEW: filter state
+  const [filter, setFilter] = useState<'All' | 'Assigned' | 'Unassigned' | 'Resolved' | 'Overdue'>('All');
+
   const toggleConversation = (ticketId: string) => {
     setOpenTicketId(prev => (prev === ticketId ? null : ticketId));
   };
@@ -87,18 +90,43 @@ const AgentLogs: FC<AgentLogsProps> = ({ agentName, groupedMessages: initialMess
     }
   };
 
+  // NEW: Filtering logic
+  const filteredTickets = tickets.filter(ticket => {
+    if (filter === 'All') return true;
+    if (filter === 'Assigned') return ticket.status.toLowerCase() === 'assigned';
+    if (filter === 'Unassigned') return ticket.status.toLowerCase() === 'unassigned';
+    if (filter === 'Resolved') return ticket.status.toLowerCase() === 'resolved';
+    if (filter === 'Overdue') return ticket.status.toLowerCase() === 'overdue';
+    return true;
+  });
+
   return (
     <div className="p-6 bg-white min-h-screen font-sans text-gray-800">
       <h1 className="text-5xl font-bold mb-6">
         Activity Log – <span className="italic text-3xl">{agentName}</span>
       </h1>
 
-      {tickets.length === 0 ? (
-        <p className="italic text-gray-400">No tickets or messages found for this agent.</p>
+      {/* NEW: Filter Buttons */}
+      <div className="flex gap-3 mb-6">
+        {['All', 'Assigned', 'Unassigned', 'Resolved', 'Overdue'].map(option => (
+          <button
+            key={option}
+            onClick={() => setFilter(option as any)}
+            className={`px-4 py-2 rounded-lg border transition ${
+              filter === option ? 'bg-blue-500 text-white border-blue-500' : 'bg-white border-gray-300 hover:bg-gray-100'
+            }`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+
+      {filteredTickets.length === 0 ? (
+        <p className="italic text-gray-400">No tickets found for this filter.</p>
       ) : (
         <div className="border rounded-xl overflow-hidden shadow">
           <div className="divide-y divide-gray-300">
-            {tickets.map((ticket, index) => {
+            {filteredTickets.map((ticket, index) => {
               const statusColor = getStatusColor(ticket.status);
               const isOpen = openTicketId === ticket.ticketId;
 
