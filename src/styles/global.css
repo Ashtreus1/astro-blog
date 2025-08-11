@@ -123,13 +123,13 @@
 }
 
 .list-item {
-  @apply bg-[#CAF0F8] text-[#003366] font-medium text-[1.05rem] px-5 py-4 rounded-md transition-all duration-200 ease-in-out cursor-pointer;
+  @apply bg-[white] text-[black] font-medium text-[1.05rem] px-5 py-4 rounded-md transition-all duration-200 ease-in-out cursor-pointer;
 }
 .list-item:hover {
-  @apply bg-[#b2e6f0] translate-x-[3px];
+  @apply bg-[gray] translate-x-[3px];
 }
 .list-item.active {
-  @apply bg-[#014F86] text-white font-semibold;
+  @apply bg-[black] text-white font-semibold;
 }
 
 .fade-out {
@@ -548,12 +548,12 @@
 }
 
 .tag-btn:hover {
-  background-color: #d3d3d3;
+  background-color: #dbdbdb;
 }
 
 .tag-btn.active {
-  background-color: #bdbdbd;
-  color: black;
+  background-color: black;
+  color: white;
   border-color: black;
 }
 
