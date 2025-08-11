@@ -90,7 +90,7 @@ export default function ChatPanel({ agentId }: { agentId: string }) {
             <MessageBox
               ticketId={selected.id}
               messages={messages}
-              appendMessage={(m) => setMessages((prev) => [...prev, m])}
+              appendMessage={() => {}}
               senderType="support"
               priority={selected.priority}
               disabled={selected.status === 'resolved'}
