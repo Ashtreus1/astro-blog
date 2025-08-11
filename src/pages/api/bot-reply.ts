@@ -16,7 +16,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     const sanitizedMessage = userMessage.trim().slice(0, 1000);
 
-    // Only allow auto-response if priority is "Low"
+    // Only allow bot to respond automatically if priority is "Low"
     if (priority !== 'Low') {
       return new Response(JSON.stringify({ error: 'Only low-priority messages are supported' }), { status: 403 });
     }
@@ -41,7 +41,9 @@ Guidelines:
 - ALWAYS be concise, helpful, and professional.
 - ONLY provide troubleshooting steps, clarifications, or follow-up questions strictly related to the issue.
 
-If no technical issue is detected in the message, respond with a polite refusal as described above.
+After providing your response, add EXACTLY ONE of the following lines at the end:
+RESOLUTION_STATUS: resolved   // if the issue is fully solved
+RESOLUTION_STATUS: escalate   // if the issue needs a human support agent
         `.trim(),
       },
       {
@@ -55,32 +57,70 @@ If no technical issue is detected in the message, respond with a polite refusal 
       messages: promptMessages,
     });
 
-    const reply = chat.choices?.[0]?.message?.content?.trim();
+    const rawReply = chat.choices?.[0]?.message?.content?.trim();
 
-    if (!reply) {
+    if (!rawReply) {
       return new Response(JSON.stringify({ error: 'No response from assistant' }), { status: 502 });
     }
 
-    // If there's a ticketId, this came from MessageBox (database-backed)
+    // Detect resolution status from bot's reply
+    let resolutionStatus: 'resolved' | 'escalate' | null = null;
+    const statusMatch = rawReply.match(/RESOLUTION_STATUS:\s*(resolved|escalate)/i);
+    if (statusMatch) {
+      resolutionStatus = statusMatch[1].toLowerCase() as 'resolved' | 'escalate';
+    }
+
+    // Clean reply before saving (remove status line for user)
+    const cleanedReply = rawReply.replace(/RESOLUTION_STATUS:.*$/i, '').trim();
+
     if (ticketId) {
-      const { error } = await supabase.from('messages').insert([
+      // Save bot reply to messages
+      const { error: msgError } = await supabase.from('messages').insert([
         {
           ticket_id: ticketId,
-          content: reply,
+          content: cleanedReply,
           sender: 'support',
         }
       ]);
 
-      if (error) {
-        console.error('Supabase insert error:', error.message);
+      if (msgError) {
+        console.error('Supabase insert error:', msgError.message);
         return new Response(JSON.stringify({ error: 'Failed to save reply' }), { status: 500 });
       }
 
-      return new Response(JSON.stringify({ success: true, reply }), { status: 200 });
+      // Handle auto-resolve or escalation
+      if (resolutionStatus === 'resolved') {
+        await supabase
+          .from('tickets')
+          .update({
+            status: 'resolved',
+            resolved_at: new Date().toISOString(),
+          })
+          .eq('id', ticketId);
+      } else if (resolutionStatus === 'escalate') {
+        // Assign to first available agent
+        const { data: agents } = await supabase
+          .from('agents')
+          .select('id')
+          .eq('is_available', true)
+          .limit(1);
+
+        if (agents && agents.length > 0) {
+          await supabase
+            .from('tickets')
+            .update({
+              status: 'Assigned',
+              agent_id: agents[0].id,
+            })
+            .eq('id', ticketId);
+        }
+      }
+
+      return new Response(JSON.stringify({ success: true, reply: cleanedReply }), { status: 200 });
     }
 
-    // Otherwise, from ChatPopup
-    return new Response(JSON.stringify({ reply }), { status: 200 });
+    // If no ticketId, just return reply
+    return new Response(JSON.stringify({ reply: cleanedReply }), { status: 200 });
 
   } catch (err) {
     console.error('Bot unified error:', err);

@@ -55,7 +55,7 @@ export default function RequestTicketModal() {
       await fetch('/api/bot-reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userMessage: issue, ticketId: ticket.id }),
+        body: JSON.stringify({ userMessage: issue, ticketId: ticket.id, priority }),
       });
     }
 

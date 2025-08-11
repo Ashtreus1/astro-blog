@@ -20,79 +20,81 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
   const [status, setStatus] = useState(ticket.status);
   const [initialLoad, setInitialLoad] = useState(false);
 
-  // Load messages and latest ticket info
+  // Load all existing messages and subscribe
   useEffect(() => {
-    const load = async () => {
-      const { data } = await supabase
+    let messageChannel: any;
+    let statusChannel: any;
+
+    const init = async () => {
+      // 1️⃣ Fetch existing messages first (includes any bot reply)
+      const { data: initialMessages, error } = await supabase
         .from('messages')
         .select('*')
         .eq('ticket_id', ticket.id)
         .order('created_at', { ascending: true });
 
-      setMessages(data || []);
+      if (!error) {
+        setMessages(initialMessages || []);
+      }
       setInitialLoad(true);
+
+      // 2️⃣ Subscribe to ticket status updates (skip for low priority)
+      if (ticket.priority !== 'Low') {
+        statusChannel = supabase
+          .channel(`ticket-status-${ticket.id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'tickets',
+              filter: `id=eq.${ticket.id}`,
+            },
+            (payload) => {
+              const newStatus = payload.new.status;
+              if (newStatus && newStatus !== status) {
+                setStatus(newStatus);
+              }
+            }
+          )
+          .subscribe();
+      }
+
+      // 3️⃣ Subscribe to new messages (after fetching existing ones)
+      if (
+        ticket.priority === 'Low' ||
+        status === 'Assigned' ||
+        status === 'Ongoing'
+      ) {
+        messageChannel = supabase
+          .channel(`messages-${ticket.id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'messages',
+              filter: `ticket_id=eq.${ticket.id}`,
+            },
+            (payload) => {
+              setMessages((prev) => {
+                const exists = prev.some((m) => m.id === payload.new.id);
+                return exists ? prev : [...prev, payload.new];
+              });
+            }
+          )
+          .subscribe();
+      }
     };
 
-    load();
-  }, [ticket.id]);
+    init();
 
-  // Subscribe to ticket status updates (skip Low priority)
-  useEffect(() => {
-    if (ticket.priority === 'Low') return;
-
-    const chan = supabase
-      .channel(`ticket-status-${ticket.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'tickets',
-          filter: `id=eq.${ticket.id}`,
-        },
-        (payload) => {
-          const newStatus = payload.new.status;
-          if (newStatus && newStatus !== status) {
-            setStatus(newStatus);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => supabase.removeChannel(chan);
+    // Cleanup
+    return () => {
+      if (messageChannel) supabase.removeChannel(messageChannel);
+      if (statusChannel) supabase.removeChannel(statusChannel);
+    };
   }, [ticket.id, ticket.priority, status]);
-
-  // Subscribe to new messages
-  useEffect(() => {
-    if (
-      ticket.priority === 'Low' ||
-      status === 'Assigned' ||
-      status === 'Ongoing'
-    ) {
-      const chan = supabase
-        .channel(`messages-${ticket.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages',
-            filter: `ticket_id=eq.${ticket.id}`,
-          },
-          (payload) => {
-            setMessages((prev) => {
-              const exists = prev.some((m) => m.id === payload.new.id);
-              return exists ? prev : [...prev, payload.new];
-            });
-          }
-        )
-        .subscribe();
-
-      return () => supabase.removeChannel(chan);
-    }
-  }, [ticket.id, ticket.priority, status]);
-
-  // const appendMessage = (m: any) => setMessages((prev) => [...prev, m]);
 
   return (
     <div className="flex flex-col h-full">
@@ -136,10 +138,10 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
       )}
 
       {status === 'resolved' && (
-          <FeedbackReport
-            ticketId={ticket.id}
-            customerId={ticket.customer_id}
-          />
+        <FeedbackReport
+          ticketId={ticket.id}
+          customerId={ticket.customer_id}
+        />
       )}
 
       <OverdueTicketReport customerId={ticket.customer_id} />
