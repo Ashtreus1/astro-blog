@@ -540,22 +540,21 @@
 .tag-btn {
   padding: 6px 12px;
   font-size: 0.85rem;
-  background-color: #f0f8ff;
-  border: 1px solid #aad4f5;
+  background-color: white;
+  border: 1px solid black;
   border-radius: 20px;
-  color: #003366;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 }
 
 .tag-btn:hover {
-  background-color: #d6f0ff;
+  background-color: #d3d3d3;
 }
 
 .tag-btn.active {
-  background-color: #0077b6;
-  color: white;
-  border-color: #0077b6;
+  background-color: #bdbdbd;
+  color: black;
+  border-color: black;
 }
 
 /* Custom scrollbar styling */

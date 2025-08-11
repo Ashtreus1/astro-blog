@@ -1,32 +1,36 @@
 ---
 import RequestTicketModal from '@/react-components/RequestTicketModal';
 ---
-<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-transform duration-300 transform translate-y-0 flex justify-between items-center w-full p-5">
-	<a href="/" class="ml-10 text-3xl font-semibold text-gray-800">ChatDesk</a>
-	<div class="flex justify-between items-center gap-5 mr-10">
-		<a href="/blogs/" class="hover:underline transition duration-300">Blog</a>
+
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-transform duration-300 transform translate-y-0 flex items-center justify-between w-full p-5">
+  <!-- Left: Logo -->
+  <div class="ml-10">
+    <a href="/" class="text-3xl font-semibold text-gray-800">ChatDesk</a>
+  </div>
+
+  <!-- Right: Links + Button -->
+  <div class="flex items-center gap-6 mr-10">
+    <a href="/blogs/" class="hover:underline transition duration-300">Blog</a>
     <a href="/reviews/" class="hover:underline transition duration-300">Reviews</a>
-		<RequestTicketModal client:load/>
-	</div>
-	<script>
-  let lastScrollY = window.scrollY;
-  const navbar = document.getElementById('navbar');
+    <RequestTicketModal client:load />
+  </div>
 
-  window.addEventListener('scroll', () => {
-    const currentScrollY = window.scrollY;
+  <script>
+    let lastScrollY = window.scrollY;
+    const navbar = document.getElementById('navbar');
 
-    if (currentScrollY > lastScrollY && currentScrollY > 50) {
-      // Scrolling down → hide navbar
-      navbar.classList.remove('translate-y-0');
-      navbar.classList.add('-translate-y-full');
-    } else {
-      // Scrolling up → show navbar
-      navbar.classList.remove('-translate-y-full');
-      navbar.classList.add('translate-y-0');
-    }
+    window.addEventListener('scroll', () => {
+      const currentScrollY = window.scrollY;
 
-    lastScrollY = currentScrollY;
-  });
-</script>
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        navbar.classList.remove('translate-y-0');
+        navbar.classList.add('-translate-y-full');
+      } else {
+        navbar.classList.remove('-translate-y-full');
+        navbar.classList.add('translate-y-0');
+      }
 
+      lastScrollY = currentScrollY;
+    });
+  </script>
 </nav>
