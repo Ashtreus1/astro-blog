@@ -23,7 +23,7 @@ export default function TicketStats() {
       const unassigned = all?.filter(
         (t) =>
           !t.agent_id &&
-          t.status.toLowerCase() !== 'resolved' &&
+          t.status.toLowerCase() === 'Open' &&
           t.priority?.toLowerCase() !== 'low'
       ).length ?? 0;
 

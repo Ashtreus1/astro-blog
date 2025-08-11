@@ -51,13 +51,7 @@ export default function RequestTicketModal() {
       return;
     }
 
-    if (priority.toLowerCase() === 'low') {
-      await fetch('/api/bot-reply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userMessage: issue, ticketId: ticket.id, priority }),
-      });
-    }
+    // Removed bot-reply API call here
 
     window.location.href = `/chats/${ticket.id}`;
   };

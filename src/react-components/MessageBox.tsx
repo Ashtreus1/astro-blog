@@ -14,6 +14,8 @@ interface Props {
   appendMessage: (message: any) => void;
   priority: 'Low' | 'Medium' | 'High';
   disabled?: boolean;
+  currentStatus?: string;
+  onStatusChange?: (newStatus: string) => void;
 }
 
 export default function MessageBox({
@@ -23,8 +25,11 @@ export default function MessageBox({
   appendMessage,
   priority,
   disabled = false,
+  currentStatus = 'Open',
+  onStatusChange,
 }: Props) {
   const [msg, setMsg] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,7 +38,13 @@ export default function MessageBox({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (disabled || !msg.trim()) return;
+    if (disabled || !msg.trim() || isProcessing) return;
+
+    // Check if ticket is already resolved or escalated
+    if (currentStatus === 'resolved') {
+      alert('This ticket has been resolved. Please create a new ticket for additional issues.');
+      return;
+    }
 
     const newMessage = {
       ticket_id: ticketId,
@@ -43,40 +54,84 @@ export default function MessageBox({
     };
 
     appendMessage(newMessage); // Optimistic update
+    const userMessage = msg;
     setMsg('');
+    setIsProcessing(true);
 
-    const { error } = await supabase.from('messages').insert([newMessage]);
-    if (error) {
-      console.error('Failed to insert message:', error);
-      return;
-    }
+    try {
+      // Save user message first
+      const { error: userMsgError } = await supabase.from('messages').insert([newMessage]);
+      if (userMsgError) {
+        console.error('Failed to save user message:', userMsgError);
+        return;
+      }
 
-    // Auto bot reply for low priority
-    if (senderType === 'customer' && priority === 'Low') {
-      try {
-        const res = await fetch('/api/bot-reply', {
+      // Call enhanced bot analysis API
+      if (senderType === 'customer') {
+        const res = await fetch('/api/enhanced-bot-reply', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ticketId, userMessage: msg, priority }),
+          body: JSON.stringify({ 
+            ticketId, 
+            userMessage, 
+            priority,
+            currentStatus 
+          }),
         });
 
         if (res.ok) {
-          const { reply } = await res.json();
-          appendMessage({
+          const { reply, statusAnalysis, statusChanged } = await res.json();
+          
+          // Add bot reply to messages
+          const botMessage = {
             ticket_id: ticketId,
             content: reply,
             sender: 'support',
             created_at: new Date().toISOString(),
+          };
+          appendMessage(botMessage);
+
+          // Handle status changes only when explicitly changed
+          if (statusChanged) {
+            if (statusAnalysis === 'RESOLVED') {
+              onStatusChange?.('resolved');
+            } else if (statusAnalysis === 'ESCALATED') {
+              onStatusChange?.('Open'); // Will be updated to 'Assigned' if agent available
+            }
+          }
+
+        } else {
+          console.error('Bot analysis failed:', await res.text());
+          // Fallback: Add a generic support message
+          appendMessage({
+            ticket_id: ticketId,
+            content: 'Thank you for your message. Our support team will review this and get back to you soon.',
+            sender: 'support',
+            created_at: new Date().toISOString(),
           });
         }
-      } catch (err) {
-        console.error('Bot reply failed:', err);
       }
+    } catch (err) {
+      console.error('Message submission failed:', err);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
+  // Disable input if ticket is resolved
+  const isInputDisabled = disabled || isProcessing || currentStatus === 'resolved';
+
   return (
     <div className="flex flex-col h-full p-4">
+      {/* Status indicator */}
+      {currentStatus === 'resolved' && (
+        <div className="mb-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+          <p className="text-green-800 text-sm font-medium">
+            ✅ This ticket has been resolved. Thank you for using our support!
+          </p>
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto space-y-3 mb-4">
         {messages.length === 0 ? (
           <p className="text-gray-400 italic">No messages yet.</p>
@@ -96,7 +151,7 @@ export default function MessageBox({
                   }`}
                 >
                   <div className="text-xs font-semibold text-gray-600 mb-1">
-                    {m.sender}{' '}
+                    {m.sender === 'support' ? '🤖 Support Bot' : '👤 You'}{' '}
                     <span className="text-[10px] text-gray-400 ml-1">
                       {new Date(m.created_at).toLocaleTimeString()}
                     </span>
@@ -130,6 +185,23 @@ export default function MessageBox({
             );
           })
         )}
+        {isProcessing && (
+          <div className="flex justify-start">
+            <div className="bg-gray-100 text-left rounded-xl rounded-bl-none px-4 py-2 text-sm">
+              <div className="text-xs font-semibold text-gray-600 mb-1">
+                🤖 Support Bot <span className="text-[10px] text-gray-400 ml-1">thinking...</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div className="animate-pulse">Analyzing your message</div>
+                <div className="flex space-x-1">
+                  <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         <div ref={containerRef} />
       </div>
 
@@ -137,11 +209,21 @@ export default function MessageBox({
         <Input
           value={msg}
           onChange={(e) => setMsg(e.currentTarget.value)}
-          placeholder="Type message..."
+          placeholder={
+            currentStatus === 'resolved' 
+              ? "Ticket resolved - create new ticket for additional issues" 
+              : "Type your message..."
+          }
           className="flex-1"
-          disabled={disabled}
+          disabled={isInputDisabled}
         />
-        <Button type="submit" disabled={disabled}>Send</Button>
+        <Button 
+          type="submit" 
+          disabled={isInputDisabled}
+          className={isProcessing ? 'opacity-50' : ''}
+        >
+          {isProcessing ? 'Processing...' : 'Send'}
+        </Button>
       </form>
     </div>
   );
