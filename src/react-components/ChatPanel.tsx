@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import TicketSidebar from '@/react-components/TicketSidebar';
 import MessageBox from '@/react-components/MessageBox';
 import { supabase } from '@/lib/supabaseClient';
@@ -12,19 +12,44 @@ export default function ChatPanel({ agentId }: { agentId: string }) {
   const tickets = useFetchTickets(agentId);
   const [selected, setSelected] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Start timer based on assigned_at from DB
+  useEffect(() => {
+    if (selected && selected.assigned_at && !selected.resolved_at) {
+      const assignedTime = new Date(selected.assigned_at).getTime();
+
+      setElapsedSeconds(Math.floor((Date.now() - assignedTime) / 1000));
+
+      if (timerRef.current) clearInterval(timerRef.current);
+      timerRef.current = setInterval(() => {
+        setElapsedSeconds(Math.floor((Date.now() - assignedTime) / 1000));
+      }, 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+      setElapsedSeconds(0);
+    }
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [selected]);
+
+  // Fetch messages and subscribe to new ones
   useEffect(() => {
     if (!selected) return;
 
     let isMounted = true;
 
     const fetchMessages = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('messages')
         .select('*')
         .eq('ticket_id', selected.id)
         .order('created_at', { ascending: true });
 
+      if (error) console.error('Error fetching messages:', error);
       if (isMounted) setMessages(data || []);
     };
 
@@ -58,16 +83,36 @@ export default function ChatPanel({ agentId }: { agentId: string }) {
   const handleResolve = async () => {
     if (!selected) return;
 
-    const { error } = await supabase
-      .from('tickets')
-      .update({ status: 'resolved' })
-      .eq('id', selected.id);
+    const resolvedAt = new Date().toISOString();
+    const totalSeconds = elapsedSeconds;
 
-    if (!error) {
-      setSelected((prev) => prev && { ...prev, status: 'resolved' });
-    } else {
-      alert('Failed to resolve ticket');
+    const { data, error } = await supabase
+      .from('tickets')
+      .update({
+        status: 'resolved',
+        resolved_at: resolvedAt,
+        resolution_time_seconds: totalSeconds
+      })
+      .eq('id', selected.id)
+      .select();
+
+    if (error) {
+      console.error('Failed to resolve ticket:', error);
+      alert('Failed to resolve ticket: ' + error.message);
+      return;
     }
+
+    if (timerRef.current) clearInterval(timerRef.current);
+    setSelected((prev) =>
+      prev
+        ? {
+            ...prev,
+            status: 'resolved',
+            resolved_at: resolvedAt,
+            resolution_time_seconds: totalSeconds
+          }
+        : prev
+    );
   };
 
   return (
@@ -80,6 +125,11 @@ export default function ChatPanel({ agentId }: { agentId: string }) {
               <div>
                 <h2 className="text-xl font-bold">{selected.name}</h2>
                 <p className="text-sm">{`${selected.issue} – ${selected.status}`}</p>
+                {selected.status !== 'resolved' && (
+                  <p className="text-xs text-gray-500">
+                    Resolution time: {elapsedSeconds}s
+                  </p>
+                )}
               </div>
               {selected.status !== 'resolved' && (
                 <Button onClick={handleResolve} variant="outline">
