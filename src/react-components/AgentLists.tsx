@@ -43,7 +43,7 @@ export default function AgentList() {
       ) : agents.length === 0 ? (
         <p className="text-sm text-gray-400 italic">No available agents</p>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 max-h-90 overflow-y-auto pr-2 custom-scrollbar">
           {agents.map((agent) => (
             <div
               key={agent.id}
