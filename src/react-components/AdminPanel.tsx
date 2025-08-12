@@ -4,9 +4,9 @@ import React, { useState, useEffect } from "react";
 import TicketStats from "@/react-components/TicketStats";
 import AgentList from "@/react-components/AgentLists";
 import SlaTicketList from "@/react-components/SlaTicketList"; 
+import SlaReport from "@/react-components/SlaReport"; // Import the SLA Report component
 import { supabase } from "@/lib/supabaseClient";
 import AssignAgentModal from "@/react-components/AssignAgentModal";
-import ResponseTimeMonitor from "@/react-components/ResponseTimeMonitor";
 
 type Ticket = {
   id: string;
@@ -80,12 +80,7 @@ export default function AdminPanel() {
             >
               Pending Tickets
             </button>
-
-            <a href="/agents/report">
-              <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                SLA Report
-              </button>
-            </a>
+            {/* Removed SLA Report button */}
           </div>
         </div>
 
@@ -95,15 +90,25 @@ export default function AdminPanel() {
           </div>
         )}
         <TicketStats />
-        <ResponseTimeMonitor/>
+        
+        {/* Added SLA Report component below SlaTicketList */}
+        <div className="mt-4">
+          <SlaReport />
+        </div>
       </div>
       
       <div>
-        <AgentList />
-
+        
         {/* Priority Section */}
-        <div className="bg-white rounded shadow p-4">
-          <h2 className="text-lg font-semibold mb-2">Priority - Overdue</h2>
+        <div className="bg-white rounded shadow p-4 mb-5">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <h2 className="text-lg font-semibold">Priority - Overdue</h2>
+            {!loadingOverdue && overdueTickets.length > 0 && (
+              <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[24px] h-6 flex items-center justify-center">
+                {overdueTickets.length}
+              </span>
+            )}
+          </div>
           {loadingOverdue ? (
             <p className="text-sm text-gray-500">Loading overdue tickets...</p>
           ) : overdueTickets.length === 0 ? (
@@ -134,7 +139,10 @@ export default function AdminPanel() {
             </div>
           )}
         </div>
+        <AgentList />
       </div>
+
+        
 
       {/* Modal Component */}
       <AssignAgentModal />
