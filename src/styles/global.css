@@ -548,7 +548,7 @@
 }
 
 .tag-btn:hover {
-  background-color: #dbdbdb;
+  background-color: gray  ;
 }
 
 .tag-btn.active {
