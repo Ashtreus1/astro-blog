@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { MonitorStop } from 'lucide-react';
 
 const pageTitle = "Blogs";
 ---
@@ -32,7 +33,9 @@ const pageTitle = "Blogs";
               Common causes and solutions for excessive battery drain on devices.
             </p>
           </div>
-
+          <div class="mt-6 text-center text-xs text-gray-500 italic select-none">
+            Click anywhere here to read the full article
+          </div>
           <!-- Buttons -->
           <div class="flex gap-3 justify-center mt-6">
             <button
@@ -49,6 +52,7 @@ const pageTitle = "Blogs";
             </button>
           </div>
         </div>
+        
       </div>
 
       <!-- RIGHT SECTION - Monochrome style -->
@@ -75,7 +79,7 @@ const pageTitle = "Blogs";
         <!-- Article List -->
         <div class="flex-1 overflow-y-auto rounded-[10px] border border-gray-300 bg-white p-3 shadow-sm">
           <ul id="articleList" class="space-y-2 text-gray-800">
-            <li class="list-item cursor-pointer hover:bg-gray-100 rounded-md px-2 py-1" data-tags="Power & Battery" onclick="selectArticle(this, 'Battery Draining Fast', 'Common causes and solutions for excessive battery drain on devices.', 'https://cdn-icons-png.flaticon.com/512/3103/3103476.png', 'battery-drainingfast')">
+            <li class="list-item cursor-pointer hover:bg-gray-100 rounded-md px-2 py-1" data-tags="Power & Battery" onclick="selectArticle(this, 'Battery Draining Fast', 'Common causes and solutions for excessive battery drain on devices.', <MonitorStop />, 'battery-drainingfast')">
               Battery Draining Fast
             </li>
             <li class="list-item cursor-pointer hover:bg-gray-100 rounded-md px-2 py-1" data-tags="Hardware & Display" onclick="selectArticle(this, 'Screen Flickering', 'Understanding why screens flicker and how to fix it.', 'https://cdn-icons-png.flaticon.com/512/5826/5826138.png', 'screen-flickering')">

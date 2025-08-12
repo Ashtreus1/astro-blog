@@ -215,17 +215,21 @@ function selectArticle(element, title, description, image, slug) {
 function showNextArticle() {
   if (!currentTitle || !groupedArticles[currentTitle]) return;
 
-  currentIndex = (currentIndex + 1) % groupedArticles[currentTitle].length;
-  updateArticleCard(groupedArticles[currentTitle][currentIndex]);
+  if (currentIndex < groupedArticles[currentTitle].length - 1) {
+    currentIndex++;
+    updateArticleCard(groupedArticles[currentTitle][currentIndex]);
+  }
+  // else do nothing (stop at last)
 }
 
 function showPrevArticle() {
   if (!currentTitle || !groupedArticles[currentTitle]) return;
 
-  currentIndex =
-    (currentIndex - 1 + groupedArticles[currentTitle].length) %
-    groupedArticles[currentTitle].length;
-  updateArticleCard(groupedArticles[currentTitle][currentIndex]);
+  if (currentIndex > 0) {
+    currentIndex--;
+    updateArticleCard(groupedArticles[currentTitle][currentIndex]);
+  }
+  // else do nothing (stop at first)
 }
 
 function updateArticleCard(article) {
@@ -244,9 +248,10 @@ function openFullArticle(slug = null) {
   if (slug) window.location.href = `/blogs/${slug}`;
 }
 
-// --- Tag Filtering (unchanged) ---
 function filterByTag(tag) {
   const listItems = document.querySelectorAll('#articleList li');
+  
+  // Remove 'active' class from all tag buttons and add to selected tag button
   document.querySelectorAll('.tag-btn').forEach((btn) =>
     btn.classList.remove('active')
   );
@@ -254,15 +259,28 @@ function filterByTag(tag) {
     .querySelector(`.tag-btn[data-tag="${tag}"]`)
     .classList.add('active');
 
+  let firstVisibleItem = null;
+
   listItems.forEach((item) => {
     const itemTags = item.getAttribute('data-tags').split(',');
     if (tag === 'All' || itemTags.includes(tag)) {
       item.style.display = 'list-item';
+      if (!firstVisibleItem) firstVisibleItem = item;
     } else {
       item.style.display = 'none';
+      item.classList.remove('active');
     }
   });
+
+  if (firstVisibleItem) {
+    // Select the first visible article
+    firstVisibleItem.click();
+  } else {
+    // If no articles visible, clear the preview panel or set to some default state if needed
+    // For example, you can clear or reset your preview panel here
+  }
 }
+
 
 // --- Search Filter ---
 function filterArticles() {
