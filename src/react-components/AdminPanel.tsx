@@ -6,6 +6,7 @@ import AgentList from "@/react-components/AgentLists";
 import SlaTicketList from "@/react-components/SlaTicketList"; 
 import { supabase } from "@/lib/supabaseClient";
 import AssignAgentModal from "@/react-components/AssignAgentModal";
+import ResponseTimeMonitor from "@/react-components/ResponseTimeMonitor";
 
 type Ticket = {
   id: string;
@@ -93,8 +94,8 @@ export default function AdminPanel() {
             <SlaTicketList />
           </div>
         )}
-
         <TicketStats />
+        <ResponseTimeMonitor/>
       </div>
       
       <div>
