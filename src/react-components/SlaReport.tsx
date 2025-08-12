@@ -27,6 +27,12 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+
 // ==========================
 // Types & Constants
 // ==========================
@@ -39,14 +45,12 @@ type Ticket = {
   resolved_at: string | null;
 };
 
-// SLA thresholds (seconds)
 const SLA_RESOLUTION_LIMITS: Record<Ticket['priority'], number> = {
-  High: 86400, // 1 day
-  Medium: 172800, // 2 days
-  Low: 0, // No resolution SLA
+  High: 86400,
+  Medium: 172800,
+  Low: 0,
 };
 
-// SLA thresholds for response times (seconds)
 const SLA_RESPONSE_LIMITS: Record<Ticket['priority'], number> = {
   High: 300,
   Medium: 900,
@@ -57,16 +61,12 @@ const PRIORITY_ORDER: Ticket['priority'][] = ['High', 'Medium', 'Low'];
 
 const COLORS = ['#219ebc', '#009689', '#104e64'];
 
-// Added `disabled` flag to avgResolution to indicate it's disabled in UI
 const chartConfig = {
   percentMet: { label: '% SLA Met', color: 'var(--chart-1)', disabled: false },
   avgResponse: { label: 'Avg. Response (s)', color: 'var(--chart-2)', disabled: false },
   avgResolution: { label: 'Avg. Resolution (s)', color: 'var(--chart-3)', disabled: true },
 };
 
-// ==========================
-// Utility Functions
-// ==========================
 function calculateAverage(values: number[]): number {
   return values.length
     ? Math.round(values.reduce((sum, val) => sum + val, 0) / values.length)
@@ -75,36 +75,20 @@ function calculateAverage(values: number[]): number {
 
 const ZeroValueLabel = ({ x, y, width, value }: any) =>
   value === 0 ? (
-    <text
-      x={x + width / 2}
-      y={y - 5}
-      fill="#999"
-      fontSize={14}
-      textAnchor="middle"
-    >
+    <text x={x + width / 2} y={y - 5} fill="#999" fontSize={14} textAnchor="middle">
       0
     </text>
   ) : null;
 
 const CountValueLabel = ({ x, y, width, value }: any) =>
   value !== 0 ? (
-    <text
-      x={x + width / 2}
-      y={y - 5}
-      fill="#333"
-      fontSize={14}
-      textAnchor="middle"
-    >
+    <text x={x + width / 2} y={y - 5} fill="#333" fontSize={14} textAnchor="middle">
       {value}
     </text>
   ) : null;
 
 const SmartLabel = (props: any) =>
-  props.value === 0 ? (
-    <ZeroValueLabel {...props} />
-  ) : (
-    <CountValueLabel {...props} />
-  );
+  props.value === 0 ? <ZeroValueLabel {...props} /> : <CountValueLabel {...props} />;
 
 // ==========================
 // Main Component
@@ -112,10 +96,7 @@ const SmartLabel = (props: any) =>
 export default function SlaReport() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
-  // Default selectedMetric must be enabled (not disabled)
-  const [selectedMetric, setSelectedMetric] = useState<
-    keyof typeof chartConfig
-  >('percentMet');
+  const [selectedMetric, setSelectedMetric] = useState<keyof typeof chartConfig>('percentMet');
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -124,31 +105,26 @@ export default function SlaReport() {
         .select(
           'status, priority, response_time_seconds, resolution_time_seconds, created_at, resolved_at'
         );
-
       if (!error && data) {
         setTickets(data as Ticket[]);
       }
       setLoading(false);
     };
-
     fetchTickets();
   }, []);
 
   const {
-    resolvedTickets,
-    slaMetTickets,
     avgResponse,
     avgResolution,
     reportPeriod,
     performanceByPriority,
     overallSlaPercent,
+    counts,
   } = useMemo(() => {
     const resolved = tickets.filter((t) => t.resolved_at !== null);
 
-    // SLA check per ticket
     const checkSLA = (t: Ticket) => {
-      const responseMet =
-        t.response_time_seconds <= SLA_RESPONSE_LIMITS[t.priority];
+      const responseMet = t.response_time_seconds <= SLA_RESPONSE_LIMITS[t.priority];
       const resolutionMet =
         t.priority === 'Low'
           ? true
@@ -160,70 +136,72 @@ export default function SlaReport() {
     const slaMet = tickets.filter(checkSLA);
 
     const startDate = tickets.length
-      ? dayjs(
-          Math.min(...tickets.map((t) => +new Date(t.created_at)))
-        ).format('MMMM D, YYYY')
+      ? dayjs(Math.min(...tickets.map((t) => +new Date(t.created_at)))).format('MMMM D, YYYY')
       : '';
-
     const endDate = tickets.length
       ? dayjs(
-          Math.max(
-            ...tickets.map((t) =>
-              +new Date(t.resolved_at || t.created_at)
-            )
-          )
+          Math.max(...tickets.map((t) => +new Date(t.resolved_at || t.created_at)))
         ).format('MMMM D, YYYY')
       : '';
 
     const performance = PRIORITY_ORDER.map((priority) => {
       const group = tickets.filter((t) => t.priority === priority);
       const met = group.filter(checkSLA);
-
       return {
         priority,
-        percentMet: group.length
-          ? Math.round((met.length / group.length) * 100)
-          : 0,
+        percentMet: group.length ? Math.round((met.length / group.length) * 100) : 0,
         avgResolution: calculateAverage(
-          group.map((t) =>
-            t.resolution_time_seconds !== null
-              ? t.resolution_time_seconds
-              : 0
-          )
+          group.map((t) => (t.resolution_time_seconds !== null ? t.resolution_time_seconds : 0))
         ),
-        avgResponse: calculateAverage(
-          group.map((t) => t.response_time_seconds)
-        ),
+        avgResponse: calculateAverage(group.map((t) => t.response_time_seconds)),
       };
     });
 
+    // Counts for formula explanations
+    const totalResponseTime = tickets.reduce((sum, t) => sum + t.response_time_seconds, 0);
+    const totalResolutionTime = resolved.reduce((sum, t) => sum + (t.resolution_time_seconds || 0), 0);
+
     return {
-      resolvedTickets: resolved,
-      slaMetTickets: slaMet,
-      avgResponse: calculateAverage(
-        tickets.map((t) => t.response_time_seconds)
-      ),
+      avgResponse: calculateAverage(tickets.map((t) => t.response_time_seconds)),
       avgResolution: calculateAverage(
-        resolved.map((t) =>
-          t.resolution_time_seconds !== null
-            ? t.resolution_time_seconds
-            : 0
-        )
+        resolved.map((t) => (t.resolution_time_seconds !== null ? t.resolution_time_seconds : 0))
       ),
-      reportPeriod:
-        startDate && endDate
-          ? `Reporting Period: ${startDate} to ${endDate}`
-          : '',
+      reportPeriod: startDate && endDate ? `Reporting Period: ${startDate} to ${endDate}` : '',
       performanceByPriority: performance,
       overallSlaPercent: tickets.length
         ? Math.round((slaMet.length / tickets.length) * 100)
         : 0,
+      counts: {
+        slaMet: slaMet.length,
+        totalTickets: tickets.length,
+        totalResponseTime,
+        totalResolutionTime,
+        totalResolvedTickets: resolved.length,
+      }
     };
   }, [tickets]);
 
   if (loading) {
     return <div className="p-4 text-muted-foreground">Loading SLA Report...</div>;
   }
+
+  const explanations: Record<string, string> = {
+    'Overall % SLA Met': `
+      Shows the percentage of tickets that met both response and resolution SLA targets.
+      Formula: (Tickets meeting SLA ÷ Total tickets) × 100
+      = (${counts.slaMet} ÷ ${counts.totalTickets}) × 100
+    `,
+    'Avg. Response Time': `
+      Shows how quickly we responded to tickets on average.
+      Formula: (Sum of response_time_seconds ÷ Number of tickets)
+      = (${counts.totalResponseTime} ÷ ${counts.totalTickets})
+    `,
+    'Avg. Resolution Time': `
+      Shows how long it took to fully resolve tickets on average.
+      Formula: (Sum of resolution_time_seconds ÷ Number of resolved tickets)
+      = (${counts.totalResolutionTime} ÷ ${counts.totalResolvedTickets})
+    `,
+  };
 
   return (
     <div className="p-4 md:p-6 max-w-screen-xl mx-auto space-y-6">
@@ -234,14 +212,14 @@ export default function SlaReport() {
           <p className="text-sm text-muted-foreground">{reportPeriod}</p>
           <br />
           <p className="text-sm text-muted-foreground mt-1">
-            This report summarizes SLA compliance based on priority-specific targets for resolution and response times.
+            This report summarizes SLA compliance based on priority-specific targets for resolution
+            and response times.
           </p>
         </div>
 
         <Tabs
           defaultValue={selectedMetric}
           onValueChange={(v) => {
-            // Prevent selecting disabled metric
             if (!chartConfig[v]?.disabled) {
               setSelectedMetric(v as keyof typeof chartConfig);
             }
@@ -264,7 +242,8 @@ export default function SlaReport() {
           </TabsList>
           {chartConfig.avgResolution.disabled && (
             <p className="text-xs text-muted-foreground mt-2 ml-2 italic">
-              * Avg. Resolution Time is currently disabled as we don’t have sufficient data in the database yet.
+              * Avg. Resolution Time is currently disabled as we don’t have sufficient data in the
+              database yet.
             </p>
           )}
         </Tabs>
@@ -286,10 +265,15 @@ export default function SlaReport() {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={performanceByPriority} barGap={8}>
                     <CartesianGrid vertical={false} />
-                    <XAxis dataKey="priority" axisLine={false} tickLine={false} tickMargin={10} />
+                    <XAxis
+                      dataKey="priority"
+                      axisLine={false}
+                      tickLine={false}
+                      tickMargin={10}
+                    />
                     <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
                     <Bar
-                      key={selectedMetric} // ✅ re-render for animation on metric change
+                      key={selectedMetric}
                       dataKey={selectedMetric}
                       radius={4}
                       label={<SmartLabel />}
@@ -324,18 +308,21 @@ export default function SlaReport() {
             value={`${overallSlaPercent}%`}
             description="Percentage of all tickets resolved within SLA target."
             icon="📈"
+            helpText={explanations['Overall % SLA Met']}
           />
           <StatCard
             title="Avg. Response Time"
             value={`${avgResponse}s`}
             description="Average time in seconds it took to respond to all tickets."
             icon="⏱️"
+            helpText={explanations['Avg. Response Time']}
           />
           <StatCard
             title="Avg. Resolution Time"
             value={`${avgResolution}s`}
             description="Average time in seconds it took to resolve tickets fully."
             icon="⏳"
+            helpText={explanations['Avg. Resolution Time']}
           />
         </div>
       </div>
@@ -351,19 +338,36 @@ function StatCard({
   value,
   description,
   icon,
+  helpText,
 }: {
   title: string;
   value: string;
   description: string;
   icon: string;
+  helpText: string;
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
     <Card className="relative overflow-hidden bg-gradient-to-br from-[#2C3E50] to-[#4CA1AF] text-white shadow-lg">
+      {/* HoverCard with click-to-open */}
+      <HoverCard open={open} onOpenChange={setOpen}>
+        <HoverCardTrigger asChild>
+          <button
+            onClick={() => setOpen(!open)}
+            className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white text-xs font-bold"
+          >
+            ?
+          </button>
+        </HoverCardTrigger>
+        <HoverCardContent className="max-w-xs text-sm whitespace-pre-line">
+          {helpText}
+        </HoverCardContent>
+      </HoverCard>
+
       <CardContent className="p-5 flex flex-col justify-between h-full">
         <p className="text-sm">{title}</p>
-        <CardDescription className="text-xs text-white/80">
-          {description}
-        </CardDescription>
+        <CardDescription className="text-xs text-white/80">{description}</CardDescription>
         <p className="text-3xl font-bold">{value}</p>
         <div className="absolute bottom-2 right-2 opacity-30 text-[60px]">{icon}</div>
       </CardContent>
