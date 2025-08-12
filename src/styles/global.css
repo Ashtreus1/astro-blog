@@ -575,7 +575,6 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #6b7280; /* Tailwind gray-500 */
 }
-
 .card {
   background: white;
   border-radius: 0.5rem;

@@ -15,26 +15,33 @@ export default function AssignAgentModal() {
   const [ticketId, setTicketId] = useState<string | null>(null);
   const [agents, setAgents] = useState<Agent[]>([]);
 
+  // ✅ Fetch agents once on mount
   useEffect(() => {
     const fetchAgents = async () => {
       const { data, error } = await supabase
         .from('agents')
         .select('id, name')
         .eq('role', 'support_agent');
+
       if (!error && data) setAgents(data);
     };
     fetchAgents();
   }, []);
 
+  // ✅ Attach event listener ONCE
   useEffect(() => {
-    const handler = (e: CustomEvent) => {
-      setTicketId(e.detail.ticketId);
+    const handler = (e: Event) => {
+      const customEvent = e as CustomEvent<{ ticketId: string }>;
+      setTicketId(customEvent.detail.ticketId);
       setOpen(true);
     };
 
-    window.addEventListener('openAssignModal', handler as EventListener);
-    return () => window.removeEventListener('openAssignModal', handler as EventListener);
-  }, []);
+    window.addEventListener('openAssignModal', handler);
+
+    return () => {
+      window.removeEventListener('openAssignModal', handler);
+    };
+  }, []); // ✅ Empty dependency array ensures no duplicate listeners
 
   const assignAgent = async (agentId: string) => {
     if (!ticketId) return;
@@ -48,6 +55,7 @@ export default function AssignAgentModal() {
       console.error('Error assigning agent:', error.message);
     } else {
       setOpen(false);
+      window.dispatchEvent(new Event('refreshOverdueTickets'));
     }
   };
 
@@ -57,7 +65,8 @@ export default function AssignAgentModal() {
         <DialogHeader>
           <DialogTitle>Assign a Support Agent</DialogTitle>
         </DialogHeader>
-        <div className="space-y-2">
+
+        <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
           {agents.length === 0 ? (
             <p className="text-sm text-gray-500">No support agents available.</p>
           ) : (
