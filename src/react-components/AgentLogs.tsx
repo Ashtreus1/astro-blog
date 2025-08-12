@@ -108,7 +108,7 @@ const AgentLogs: FC<AgentLogsProps> = ({ agentName, groupedMessages: initialMess
 
       {/* NEW: Filter Buttons */}
       <div className="flex gap-3 mb-6">
-        {['All', 'Assigned', 'Unassigned', 'Resolved', 'Overdue'].map(option => (
+        {['All', 'Assigned', 'Unassigned', 'Resolved'].map(option => (
           <button
             key={option}
             onClick={() => setFilter(option as any)}
