@@ -344,14 +344,6 @@ export default function SlaReport() {
       • Tickets violating SLA: ${counts.slaViolated}
       • Formula: (${counts.slaMet} ÷ ${counts.slaEligibleTickets}) × 100 = ${overallSlaPercent}%
       
-      SLA REQUIREMENTS:
-      • High Priority: Response < 5min (300s), Resolution < 24hrs (86400s)
-      • Medium Priority: Response < 15min (900s), Resolution < 48hrs (172800s)
-      • Low Priority: No SLA requirements (auto-pass)
-      
-      ⚠️ STRICT LIMITS: Times must be LESS THAN the limit (not equal to)
-      ⚠️ Example: 300 seconds = SLA VIOLATION for High priority (must be < 300)
-      
       SLA VIOLATIONS INCLUDE:
       • Response time exceeded: ${slaBreakdown.responseBreaches} tickets
       • Resolution time exceeded: ${slaBreakdown.resolutionBreaches} tickets
@@ -368,8 +360,7 @@ export default function SlaReport() {
       • Total tickets: ${counts.totalTickets}
       • Formula: ${counts.totalResponseTime.toLocaleString()}s ÷ ${counts.totalTickets} = ${avgResponse}s
       • Human readable: ${formatSeconds(avgResponse)}
-      
-      This metric includes all tickets to show overall team responsiveness.
+    
     `,
     'Avg. Resolution Time': `
       Average time taken to fully resolve tickets (RESOLVED tickets only).
