@@ -43,52 +43,41 @@ const AgentLogs: FC<AgentLogsProps> = ({ agentName, groupedMessages: initialMess
   const [deleting, setDeleting] = useState<string | null>(null);
 
   // NEW: filter state
-  const [filter, setFilter] = useState<'All' | 'Assigned' | 'Unassigned' | 'Resolved' | 'Overdue'>('All');
+  const [filter, setFilter] = useState<'All' | 'Assigned' | 'Unassigned' | 'Resolved'>('All');
 
   const toggleConversation = (ticketId: string) => {
     setOpenTicketId(prev => (prev === ticketId ? null : ticketId));
   };
 
   const deleteConversation = async (ticketId: string) => {
-    if (!confirm('Are you sure you want to delete this conversation?')) return;
+  if (!confirm('Are you sure you want to delete all messages in this conversation?')) return;
 
-    setDeleting(ticketId);
+  setDeleting(ticketId);
 
-    try {
-      // 1️⃣ Delete reports for the ticket
-      const { error: reportsErr } = await supabase
-        .from('reports')
-        .delete()
-        .eq('ticket_id', ticketId);
+  try {
+    // ✅ Only delete messages for the ticket
+    const { error: messagesErr } = await supabase
+      .from('messages')
+      .delete()
+      .eq('ticket_id', ticketId);
 
-      if (reportsErr) throw reportsErr;
+    if (messagesErr) throw messagesErr;
 
-      // 2️⃣ Delete messages for the ticket
-      const { error: messagesErr } = await supabase
-        .from('messages')
-        .delete()
-        .eq('ticket_id', ticketId);
+    // ✅ Clear messages from UI state
+    setTickets(prev =>
+      prev.map(ticket =>
+        ticket.ticketId === ticketId ? { ...ticket, messages: [] } : ticket
+      )
+    );
 
-      if (messagesErr) throw messagesErr;
-
-      // 3️⃣ Delete the ticket itself
-      const { error: ticketsErr } = await supabase
-        .from('tickets')
-        .delete()
-        .eq('id', ticketId);
-
-      if (ticketsErr) throw ticketsErr;
-
-      // ✅ Update UI
-      setTickets(prev => prev.filter(ticket => ticket.ticketId !== ticketId));
-      if (openTicketId === ticketId) setOpenTicketId(null);
-    } catch (error) {
-      console.error('Error deleting ticket:', error);
-      alert('Failed to delete the conversation.');
-    } finally {
-      setDeleting(null);
-    }
-  };
+    if (openTicketId === ticketId) setOpenTicketId(null); // optional: close the conversation after deletion
+  } catch (error) {
+    console.error('Error deleting messages:', error);
+    alert('Failed to delete the messages.');
+  } finally {
+    setDeleting(null);
+  }
+};
 
   // NEW: Filtering logic
   const filteredTickets = tickets.filter(ticket => {
@@ -96,7 +85,6 @@ const AgentLogs: FC<AgentLogsProps> = ({ agentName, groupedMessages: initialMess
     if (filter === 'Assigned') return ticket.status.toLowerCase() === 'assigned';
     if (filter === 'Unassigned') return ticket.status.toLowerCase() === 'unassigned';
     if (filter === 'Resolved') return ticket.status.toLowerCase() === 'resolved';
-    if (filter === 'Overdue') return ticket.status.toLowerCase() === 'overdue';
     return true;
   });
 
