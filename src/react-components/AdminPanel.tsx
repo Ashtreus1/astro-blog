@@ -129,9 +129,13 @@ export default function AdminPanel() {
                     </div>
                   </div>
                   <button
-                    onClick={() => openAssignModal(ticket.id)}
+                    onClick={() => {
+                      openAssignModal(ticket.id);
+                    }}
+                    disabled={document.querySelector('[data-state="open"]')} // disables if modal already open
                     className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
                   >
+                    
                     Assign Agent
                   </button>
                 </div>

@@ -8,40 +8,63 @@ import { Button } from '@/components/ui/button';
 interface Agent {
   id: string;
   name: string;
+  ticketCount: number;
 }
 
 export default function AssignAgentModal() {
   const [open, setOpen] = useState(false);
   const [ticketId, setTicketId] = useState<string | null>(null);
   const [agents, setAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch agents once on mount
-  useEffect(() => {
-    const fetchAgents = async () => {
-      const { data, error } = await supabase
-        .from('agents')
-        .select('id, name')
-        .eq('role', 'support_agent');
+  // ✅ Fetch agents without updating DB
+  const fetchAgentsWithAvailability = async () => {
+    setLoading(true);
 
-      if (!error && data) setAgents(data);
-    };
-    fetchAgents();
-  }, []);
+    const { data: agentsData, error: agentsError } = await supabase
+      .from('agents')
+      .select('id, name')
+      .eq('role', 'support_agent');
 
-  // ✅ Attach event listener ONCE
+    if (agentsError || !agentsData) {
+      setAgents([]);
+      setLoading(false);
+      return;
+    }
+
+    const updatedAgents: Agent[] = [];
+
+    for (const agent of agentsData) {
+      const { count } = await supabase
+        .from('tickets')
+        .select('*', { count: 'exact', head: true })
+        .eq('agent_id', agent.id)
+        .eq('status', 'Assigned');
+
+      updatedAgents.push({
+        ...agent,
+        ticketCount: count ?? 0,
+      });
+    }
+
+    setAgents(updatedAgents);
+    setLoading(false);
+  };
+
+  // ✅ Listen for modal open
   useEffect(() => {
     const handler = (e: Event) => {
       const customEvent = e as CustomEvent<{ ticketId: string }>;
       setTicketId(customEvent.detail.ticketId);
+      fetchAgentsWithAvailability(); // get fresh data
       setOpen(true);
     };
 
     window.addEventListener('openAssignModal', handler);
-
     return () => {
       window.removeEventListener('openAssignModal', handler);
     };
-  }, []); // ✅ Empty dependency array ensures no duplicate listeners
+  }, []);
 
   const assignAgent = async (agentId: string) => {
     if (!ticketId) return;
@@ -51,11 +74,11 @@ export default function AssignAgentModal() {
       .update({ agent_id: agentId, status: 'Assigned' })
       .eq('id', ticketId);
 
-    if (error) {
-      console.error('Error assigning agent:', error.message);
-    } else {
+    if (!error) {
       setOpen(false);
       window.dispatchEvent(new Event('refreshOverdueTickets'));
+    } else {
+      console.error('Error assigning agent:', error.message);
     }
   };
 
@@ -67,19 +90,25 @@ export default function AssignAgentModal() {
         </DialogHeader>
 
         <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
-          {agents.length === 0 ? (
+          {loading ? (
+            <p className="text-sm text-gray-500">Loading agents...</p>
+          ) : agents.length === 0 ? (
             <p className="text-sm text-gray-500">No support agents available.</p>
           ) : (
-            agents.map((agent) => (
-              <Button
-                key={agent.id}
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => assignAgent(agent.id)}
-              >
-                {agent.name}
-              </Button>
-            ))
+            agents.map((agent) => {
+              const isFull = agent.ticketCount >= 5;
+              return (
+                <Button
+                  key={agent.id}
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => !isFull && assignAgent(agent.id)}
+                  disabled={isFull}
+                >
+                  {agent.name} {isFull && ' (Unavailable)'}
+                </Button>
+              );
+            })
           )}
         </div>
       </DialogContent>
