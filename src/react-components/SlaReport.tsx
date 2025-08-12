@@ -57,10 +57,11 @@ const PRIORITY_ORDER: Ticket['priority'][] = ['High', 'Medium', 'Low'];
 
 const COLORS = ['#219ebc', '#009689', '#104e64'];
 
+// Added `disabled` flag to avgResolution to indicate it's disabled in UI
 const chartConfig = {
-  percentMet: { label: '% SLA Met', color: 'var(--chart-1)' },
-  avgResponse: { label: 'Avg. Response (s)', color: 'var(--chart-2)' },
-  avgResolution: { label: 'Avg. Resolution (s)', color: 'var(--chart-3)' },
+  percentMet: { label: '% SLA Met', color: 'var(--chart-1)', disabled: false },
+  avgResponse: { label: 'Avg. Response (s)', color: 'var(--chart-2)', disabled: false },
+  avgResolution: { label: 'Avg. Resolution (s)', color: 'var(--chart-3)', disabled: true },
 };
 
 // ==========================
@@ -111,6 +112,7 @@ const SmartLabel = (props: any) =>
 export default function SlaReport() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
+  // Default selectedMetric must be enabled (not disabled)
   const [selectedMetric, setSelectedMetric] = useState<
     keyof typeof chartConfig
   >('percentMet');
@@ -238,7 +240,12 @@ export default function SlaReport() {
 
         <Tabs
           defaultValue={selectedMetric}
-          onValueChange={(v) => setSelectedMetric(v as keyof typeof chartConfig)}
+          onValueChange={(v) => {
+            // Prevent selecting disabled metric
+            if (!chartConfig[v]?.disabled) {
+              setSelectedMetric(v as keyof typeof chartConfig);
+            }
+          }}
           className="w-full md:w-auto"
         >
           <TabsList className="flex gap-2">
@@ -246,15 +253,20 @@ export default function SlaReport() {
               <TabsTrigger
                 key={key}
                 value={key}
-                className="rounded-md border px-4 py-2 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-white"
+                disabled={cfg.disabled}
+                className={`rounded-md border px-4 py-2 text-sm font-medium
+                  data-[state=active]:bg-primary data-[state=active]:text-white
+                  ${cfg.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {cfg.label}
               </TabsTrigger>
             ))}
           </TabsList>
-          <p className="text-xs text-muted-foreground mt-2 ml-2">
-            Toggle between metrics to visualize SLA performance by priority.
-          </p>
+          {chartConfig.avgResolution.disabled && (
+            <p className="text-xs text-muted-foreground mt-2 ml-2 italic">
+              * Avg. Resolution Time is currently disabled as we don’t have sufficient data in the database yet.
+            </p>
+          )}
         </Tabs>
       </div>
 
