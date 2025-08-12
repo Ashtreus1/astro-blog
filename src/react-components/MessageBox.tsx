@@ -18,6 +18,8 @@ interface Props {
   onStatusChange?: (newStatus: string) => void;
 }
 
+
+
 export default function MessageBox({
   ticketId,
   senderType,
@@ -67,7 +69,7 @@ export default function MessageBox({
       }
 
       // Call enhanced bot analysis API
-      if (senderType === 'customer') {
+      if (senderType === 'customer' && priority === 'Low') {
         const res = await fetch('/api/enhanced-bot-reply', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -127,7 +129,7 @@ export default function MessageBox({
       {currentStatus === 'resolved' && (
         <div className="mb-4 p-3 bg-green-100 border border-green-300 rounded-lg">
           <p className="text-green-800 text-sm font-medium">
-            ✅ This ticket has been resolved. Thank you for using our support!
+            This ticket has been resolved. Thank you for using our support!
           </p>
         </div>
       )}
@@ -151,7 +153,7 @@ export default function MessageBox({
                   }`}
                 >
                   <div className="text-xs font-semibold text-gray-600 mb-1">
-                    {m.sender === 'support' ? '🤖 Support Bot' : '👤 You'}{' '}
+                    {m.sender === 'support' ? 'Support Bot' : 'You'}{' '}
                     <span className="text-[10px] text-gray-400 ml-1">
                       {new Date(m.created_at).toLocaleTimeString()}
                     </span>
@@ -185,23 +187,7 @@ export default function MessageBox({
             );
           })
         )}
-        {isProcessing && (
-          <div className="flex justify-start">
-            <div className="bg-gray-100 text-left rounded-xl rounded-bl-none px-4 py-2 text-sm">
-              <div className="text-xs font-semibold text-gray-600 mb-1">
-                🤖 Support Bot <span className="text-[10px] text-gray-400 ml-1">thinking...</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <div className="animate-pulse">Analyzing your message</div>
-                <div className="flex space-x-1">
-                  <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+
         <div ref={containerRef} />
       </div>
 
