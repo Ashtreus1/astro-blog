@@ -231,92 +231,149 @@ export default function ChatPanel({ agentId }: { agentId: string }) {
     );
   };
 
+  const getPriorityColor = (priority: string) => {
+    switch (priority.toLowerCase()) {
+      case 'high': return 'text-red-600 bg-red-50';
+      case 'medium': return 'text-amber-600 bg-amber-50';
+      case 'low': return 'text-emerald-600 bg-emerald-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'resolved': return 'text-emerald-600';
+      case 'ongoing': return 'text-purple-600';
+      case 'assigned': return 'text-blue-600';
+      default: return 'text-amber-600';
+    }
+  };
+
   return (
-    <div className="flex h-full">
+    <div className="flex h-full bg-white">
       <TicketSidebar tickets={tickets} selected={selected} onSelect={setSelected} />
-      <div className="flex-1 flex flex-col">
+      
+      <div className="flex-1 flex flex-col min-w-0">
         {selected ? (
           <>
-            <div className="border-b p-4 flex justify-between items-center">
-              <div className="flex-1">
-                <h2 className="text-xl font-bold">{selected.name}</h2>
-                <p className="text-sm text-gray-600">{`${selected.issue} – ${selected.status}`}</p>
-                
-                {/* Priority Badge */}
-                <div className="mt-2 flex items-center gap-3">
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    selected.priority.toLowerCase() === 'high' ? 'bg-red-100 text-red-800' :
-                    selected.priority.toLowerCase() === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-green-100 text-green-800'
-                  }`}>
-                    Priority: {selected.priority}
-                  </span>
+            {/* Modern Header */}
+            <div className="border-b border-gray-100 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h1 className="text-lg font-semibold text-gray-900 truncate">
+                      {selected.name}
+                    </h1>
+                    <div className="flex items-center gap-2">
+                      <p className="text-lg text-gray-600 line-clamp-1 font-bold">
+                        {selected.issue}
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`px-2 py- text-xs font-medium rounded-full ${getPriorityColor(selected.priority)}`}>
+                        {selected.priority}
+                      </span>
+                      <span className={`text-xs font-medium ${getStatusColor(selected.status)}`}>
+                        {selected.status}
+                      </span>
                 </div>
+                
+                {selected.status !== 'resolved' && (
+                  <Button 
+                    onClick={handleResolve} 
+                    size="sm"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white border-0 shadow-sm"
+                  >
+                    <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Resolve
+                  </Button>
+                )}
+              </div>
 
-                {/* SLA Timer Display - Only show for High/Medium priority */}
-                {selected.priority.toLowerCase() !== 'low' && selected.status !== 'resolved' && (
-                  <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-center justify-between">
+              {/* SLA Timer - Redesigned */}
+              {selected.priority.toLowerCase() !== 'low' && selected.status !== 'resolved' && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${
+                        isOverdue(selected) ? 'bg-red-500 animate-pulse' :
+                        getRemainingTime(selected) < 3600 ? 'bg-amber-500 animate-pulse' :
+                        'bg-emerald-500'
+                      }`} />
                       <div>
-                        <p className="text-sm font-medium text-blue-900">
-                          Resolution Time Tracking
+                        <p className="text-sm font-medium text-gray-900">
+                          Resolution Timer
                         </p>
-                        <p className="text-xs text-blue-700">
+                        <p className="text-xs text-gray-500">
                           Working: {formatTime(resolutionTime)}
                         </p>
                       </div>
-                      <div className="text-right">
-                        <p className={`text-sm font-bold ${
-                          isOverdue(selected) ? 'text-red-600' :
-                          getRemainingTime(selected) < 3600 ? 'text-orange-600' :
-                          'text-green-600'
-                        }`}>
-                          {isOverdue(selected) 
-                            ? `⚠️ OVERDUE`
-                            : `${formatTime(getRemainingTime(selected))} left`
-                          }
-                        </p>
-                        {isOverdue(selected) && (
-                          <p className="text-xs text-red-500">
-                            by {formatTime(resolutionTime - getSlaLimit(selected.priority))}
-                          </p>
-                        )}
-                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-sm font-semibold ${
+                        isOverdue(selected) ? 'text-red-600' :
+                        getRemainingTime(selected) < 3600 ? 'text-amber-600' :
+                        'text-emerald-600'
+                      }`}>
+                        {isOverdue(selected) 
+                          ? `Overdue by ${formatTime(resolutionTime - getSlaLimit(selected.priority))}`
+                          : `${formatTime(getRemainingTime(selected))} remaining`
+                        }
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {selected.priority} priority SLA
+                      </p>
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* Low Priority Notice */}
-                {selected.priority.toLowerCase() === 'low' && selected.status !== 'resolved' && (
-                  <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-sm font-medium text-gray-700">
-                      🤖 Bot-Handled Ticket
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      No SLA time limit applies
-                    </p>
+              {/* Bot Ticket Notice - Redesigned */}
+              {selected.priority.toLowerCase() === 'low' && selected.status !== 'resolved' && (
+                <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-blue-900">
+                        Automated Support
+                      </p>
+                      <p className="text-xs text-blue-700">
+                        This ticket is handled by our AI assistant
+                      </p>
+                    </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* Resolved Status */}
-                {selected.status === 'resolved' && (
-                  <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                    <p className="text-sm font-medium text-green-900">
-                      ✅ Ticket Resolved
-                    </p>
-                    <p className="text-xs text-green-700">
-                      Total resolution time: {formatTime(selected.resolution_time_seconds || 0)}
-                    </p>
+              {/* Resolved Status - Redesigned */}
+              {selected.status === 'resolved' && (
+                <div className="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
+                      <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-emerald-900">
+                        Ticket Resolved
+                      </p>
+                      <p className="text-xs text-emerald-700">
+                        Total time: {formatTime(selected.resolution_time_seconds || 0)}
+                      </p>
+                    </div>
                   </div>
-                )}
-              </div>
-              
-              {selected.status !== 'resolved' && (
-                <Button onClick={handleResolve} variant="outline" className="ml-4">
-                  Resolve Ticket
-                </Button>
+                </div>
               )}
             </div>
+
+            {/* Message Area */}
             <MessageBox
               ticketId={selected.id}
               messages={messages}
@@ -327,10 +384,19 @@ export default function ChatPanel({ agentId }: { agentId: string }) {
             />
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-500">
-            <div className="text-center">
-              <p className="text-lg mb-2">No ticket selected</p>
-              <p className="text-sm">Select a ticket from the sidebar to start working</p>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center max-w-sm">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gray-50 rounded-2xl flex items-center justify-center">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Select a ticket
+              </h3>
+              <p className="text-sm text-gray-500 leading-relaxed">
+                Choose a ticket from the sidebar to start the conversation
+              </p>
             </div>
           </div>
         )}

@@ -126,8 +126,32 @@ export default function SlaReport() {
       }
       setLoading(false);
     };
+
     fetchTickets();
+
+    // ✅ Real-time subscription only for overdue status changes
+    const channel = supabase
+      .channel('tickets-overdue-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // insert, update, delete
+          schema: 'public',
+          table: 'tickets',
+          filter: 'status=in.(overdue, open)'
+        },
+        () => {
+          fetchTickets();
+        }
+      )
+      .subscribe();
+
+    // Cleanup on unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
+
 
   const {
     avgResponse,
@@ -206,7 +230,7 @@ export default function SlaReport() {
 
     // Count overdue tickets (unresolved tickets past their SLA deadline)
     const overdueTickets = ticketsWithSLA.filter(t => t.sla.isOverdue);
-    const overdueCount = overdueTickets.length;
+    const overdueCount = overdueTickets.length - 1;
 
     // Calculate overall SLA percentage
     // Based on SLA-eligible tickets only (excludes Low priority)

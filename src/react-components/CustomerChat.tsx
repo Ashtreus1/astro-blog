@@ -21,42 +21,38 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
   const [priority, setPriority] = useState(ticket.priority);
   const [initialLoad, setInitialLoad] = useState(false);
 
-  // Function to append messages and avoid duplicates
   const appendMessage = (newMessage: any) => {
     setMessages((prev) => {
-      // Check if message already exists (for optimistic updates)
-      const exists = prev.some((m) => 
-        m.content === newMessage.content && 
-        m.sender === newMessage.sender &&
-        Math.abs(new Date(m.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 5000
+      const exists = prev.some(
+        (m) =>
+          m.content === newMessage.content &&
+          m.sender === newMessage.sender &&
+          Math.abs(
+            new Date(m.created_at).getTime() -
+              new Date(newMessage.created_at).getTime()
+          ) < 5000
       );
       return exists ? prev : [...prev, newMessage];
     });
   };
 
-  // Handle status changes from MessageBox
   const handleStatusChange = (newStatus: string) => {
     setStatus(newStatus);
   };
 
-  // Load all existing messages and subscribe
   useEffect(() => {
     let messageChannel: any;
     let statusChannel: any;
 
     const init = async () => {
-      // 1️⃣ Fetch existing messages first
-      const { data: initialMessages, error } = await supabase
+      const { data: initialMessages } = await supabase
         .from('messages')
         .select('*')
         .eq('ticket_id', ticket.id)
         .order('created_at', { ascending: true });
 
-      if (!error) {
-        setMessages(initialMessages || []);
-      }
+      setMessages(initialMessages || []);
 
-      // 2️⃣ Fetch current ticket status and priority
       const { data: ticketData } = await supabase
         .from('tickets')
         .select('status, priority')
@@ -70,7 +66,6 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
 
       setInitialLoad(true);
 
-      // 3️⃣ Subscribe to ticket status and priority updates
       statusChannel = supabase
         .channel(`ticket-updates-${ticket.id}`)
         .on(
@@ -82,20 +77,16 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
             filter: `id=eq.${ticket.id}`,
           },
           (payload) => {
-            const newStatus = payload.new.status;
-            const newPriority = payload.new.priority;
-            
-            if (newStatus && newStatus !== status) {
-              setStatus(newStatus);
+            if (payload.new.status && payload.new.status !== status) {
+              setStatus(payload.new.status);
             }
-            if (newPriority && newPriority !== priority) {
-              setPriority(newPriority);
+            if (payload.new.priority && payload.new.priority !== priority) {
+              setPriority(payload.new.priority);
             }
           }
         )
         .subscribe();
 
-      // 4️⃣ Subscribe to new messages (only if ticket is not resolved)
       if (status !== 'resolved') {
         messageChannel = supabase
           .channel(`messages-${ticket.id}`)
@@ -117,14 +108,12 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
 
     init();
 
-    // Cleanup
     return () => {
       if (messageChannel) supabase.removeChannel(messageChannel);
       if (statusChannel) supabase.removeChannel(statusChannel);
     };
   }, [ticket.id]);
 
-  // Re-subscribe to messages when status changes from resolved to something else
   useEffect(() => {
     if (status !== 'resolved' && initialLoad) {
       const messageChannel = supabase
@@ -151,84 +140,113 @@ export default function CustomerChat({ ticket }: { ticket: Ticket }) {
 
   const getStatusColor = (ticketStatus: string) => {
     switch (ticketStatus) {
-      case 'Open': return 'bg-yellow-50 border-yellow-200 text-yellow-800';
-      case 'Assigned': return 'bg-blue-50 border-blue-200 text-blue-800';
-      case 'Ongoing': return 'bg-purple-50 border-purple-200 text-purple-800';
-      case 'resolved': return 'bg-green-50 border-green-200 text-green-800';
-      default: return 'bg-gray-50 border-gray-200 text-gray-800';
+      case 'Open': return 'text-amber-600';
+      case 'Assigned': return 'text-blue-600';
+      case 'Ongoing': return 'text-purple-600';
+      case 'resolved': return 'text-emerald-600';
+      default: return 'text-gray-500';
     }
   };
 
   const getPriorityColor = (ticketPriority: string) => {
     switch (ticketPriority) {
-      case 'High': return 'bg-red-100 text-red-800 border-red-200';
-      case 'Medium': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'Low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'High': return 'text-red-600';
+      case 'Medium': return 'text-orange-500';
+      case 'Low': return 'text-green-600';
+      default: return 'text-gray-500';
+    }
+  };
+
+  const getStatusDot = (ticketStatus: string) => {
+    switch (ticketStatus) {
+      case 'Open': return 'bg-amber-400';
+      case 'Assigned': return 'bg-blue-500';
+      case 'Ongoing': return 'bg-purple-500 animate-pulse';
+      case 'resolved': return 'bg-emerald-500';
+      default: return 'bg-gray-400';
     }
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="border-b p-4 bg-blue-50">
-        <div className="flex justify-between items-start mb-2">
-          <h2 className="text-xl font-bold">{ticket.name}</h2>
-          <div className="flex gap-2">
-            <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getPriorityColor(priority)}`}>
-              {priority} Priority
-            </span>
-            <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(status)}`}>
-              {status}
-            </span>
+    <div className="flex flex-col h-full bg-white">
+      {/* Minimalist Header */}
+      <div className="px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-medium text-gray-900 truncate">
+              {ticket.name}
+            </h1>
+            <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">
+              {ticket.issue}
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4 ml-4">
+            {/* Priority Indicator */}
+            <div className="flex items-center gap-1.5">
+              <div className={`w-1.5 h-1.5 rounded-full ${getPriorityColor(priority).replace('text-', 'bg-')}`} />
+              <span className={`text-xs font-medium ${getPriorityColor(priority)}`}>
+                {priority}
+              </span>
+            </div>
+            
+            {/* Status Indicator */}
+            <div className="flex items-center gap-1.5">
+              <div className={`w-2 h-2 rounded-full ${getStatusDot(status)}`} />
+              <span className={`text-xs font-medium ${getStatusColor(status)}`}>
+                {status}
+              </span>
+            </div>
           </div>
         </div>
-        <p className="text-sm text-gray-600">{ticket.issue}</p>
-        
-        {/* Status change notifications */}
-        {status === 'resolved' && (
-          <div className="mt-2 p-2 bg-green-100 border border-green-300 rounded text-sm text-green-700">
-            🎉 Your issue has been resolved! If you need further assistance, please create a new ticket.
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 min-h-0">
+        {!initialLoad ? (
+          <div className="h-full flex items-center justify-center">
+            <div className="flex items-center gap-3 text-gray-400">
+              <div className="w-5 h-5 border-2 border-gray-200 border-t-gray-400 rounded-full animate-spin" />
+              <span className="text-sm font-medium">Loading conversation</span>
+            </div>
           </div>
-        )}
-        {status === 'Open' && priority === 'Medium' && ticket.priority === 'Low' && (
-          <div className="mt-2 p-2 bg-orange-100 border border-orange-300 rounded text-sm text-orange-700">
-            📈 Your ticket has been escalated to our human support team for specialized assistance.
+        ) : status !== 'Assigned' && status !== 'Ongoing' && status !== 'resolved' && priority !== 'Low' ? (
+          <div className="h-full flex items-center justify-center px-6">
+            <div className="text-center max-w-sm">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gray-50 flex items-center justify-center">
+                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-sm font-medium text-gray-900 mb-1">
+                Waiting for assignment
+              </h3>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                Your ticket is in the queue and will be assigned to an agent soon
+              </p>
+            </div>
           </div>
+        ) : (
+          <MessageBox
+            ticketId={ticket.id}
+            messages={messages}
+            appendMessage={appendMessage}
+            senderType="customer"
+            priority={priority}
+            currentStatus={status}
+            onStatusChange={handleStatusChange}
+          />
         )}
       </div>
 
-      {!initialLoad ? (
-        <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
-          <div className="flex items-center space-x-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-            <span>Loading chat...</span>
-          </div>
-        </div>
-      ) : status !== 'Assigned' && status !== 'Ongoing' && status !== 'resolved' && priority !== 'Low' ? (
-        <div className="flex-1 flex items-center justify-center text-gray-500 text-lg italic px-6 text-center">
-          <div className="max-w-md text-center">
-            <div className="mb-4 text-4xl">⏳</div>
-            <p>Your ticket has been submitted and is waiting for agent assignment.</p>
-            <p className="text-sm text-gray-400 mt-2">Priority: {priority}</p>
-          </div>
-        </div>
-      ) : (
-        <MessageBox
-          ticketId={ticket.id}
-          messages={messages}
-          appendMessage={appendMessage}
-          senderType="customer"
-          priority={priority}
-          currentStatus={status}
-          onStatusChange={handleStatusChange}
-        />
-      )}
-
+      {/* Footer Components */}
       {status === 'resolved' && (
-        <FeedbackReport
-          ticketId={ticket.id}
-          customerId={ticket.customer_id}
-        />
+        <div className="border-t border-gray-100">
+          <FeedbackReport
+            ticketId={ticket.id}
+            customerId={ticket.customer_id}
+          />
+        </div>
       )}
 
       <OverdueTicketReport customerId={ticket.customer_id} />
